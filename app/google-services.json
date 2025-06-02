@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "661136451599",
+    "project_id": "conexion-de-oficios",
+    "storage_bucket": "conexion-de-oficios.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661136451599:android:7957ce3632fa74dad9db7a",
+        "android_client_info": {
+          "package_name": "com.javipena.conexiondeoficios"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCG4XF12IK8v4v6JRxQ-wAscUbrUh3MuaQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
