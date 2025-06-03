@@ -1,21 +1,26 @@
 package com.javipena.conexiondeoficios.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.FirebaseDatabase
 import com.javipena.conexiondeoficios.R
-import com.javipena.conexiondeoficios.adapters.ContractorAdapter
-import com.javipena.conexiondeoficios.models.Contractor
 
 class RegisterContractorActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var contractorList: ArrayList<Contractor>
-    private lateinit var adapter: ContractorAdapter
-    private lateinit var database: DatabaseReference
+    private lateinit var editName: EditText
+    private lateinit var editLastname: EditText
+    private lateinit var editPhone: EditText
+    private lateinit var editEmail: EditText
+    private lateinit var editPassword: EditText
+    private lateinit var editCompanyName: EditText
+    private lateinit var spinnerSpecialty: Spinner
+    private lateinit var editRFC: EditText
+    private lateinit var editLatitude: EditText
+    private lateinit var editLongitude: EditText
+    private lateinit var editSecretQuestion: EditText
+    private lateinit var editSecretAnswer: EditText
     private lateinit var btnRegister: Button
     private lateinit var auth: FirebaseAuth
 
@@ -24,83 +29,76 @@ class RegisterContractorActivity : AppCompatActivity() {
         setContentView(R.layout.activity_register_contractor)
 
         auth = FirebaseAuth.getInstance()
-        recyclerView = findViewById(R.id.recycler_contractors) // 📌 Corrección aquí
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        contractorList = ArrayList()
-        adapter = ContractorAdapter(contractorList)
-        recyclerView.adapter = adapter
-
-        database = FirebaseDatabase.getInstance().getReference("Contractors")
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                contractorList.clear()
-                for (contractorSnapshot in snapshot.children) {
-                    val contractor = contractorSnapshot.getValue(Contractor::class.java)
-                    contractor?.let { contractorList.add(it) }
-                }
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@RegisterContractorActivity, "Error al cargar datos", Toast.LENGTH_SHORT).show()
-            }
-        })
-
+        editName = findViewById(R.id.edit_name)
+        editLastname = findViewById(R.id.edit_lastname)
+        editPhone = findViewById(R.id.edit_phone)
+        editEmail = findViewById(R.id.edit_email)
+        editPassword = findViewById(R.id.edit_password)
+        editCompanyName = findViewById(R.id.edit_company)
+        spinnerSpecialty = findViewById(R.id.spinner_specialty)
+        editRFC = findViewById(R.id.edit_rfc)
+        editLatitude = findViewById(R.id.edit_latitude)
+        editLongitude = findViewById(R.id.edit_longitude)
         btnRegister = findViewById(R.id.btn_register)
+
+        // 📌 Cargar especialidades en el Spinner
+        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor", "Otro")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, specialties)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSpecialty.adapter = adapter
+
         btnRegister.setOnClickListener {
             registerContractor()
         }
     }
 
     private fun registerContractor() {
-        val name = findViewById<EditText>(R.id.edit_name).text.toString()
-        val lastname = findViewById<EditText>(R.id.edit_lastname).text.toString()
-        val phone = findViewById<EditText>(R.id.edit_phone).text.toString()
-        val email = findViewById<EditText>(R.id.edit_email).text.toString()
-        val password = findViewById<EditText>(R.id.edit_password).text.toString()
-        val companyName = findViewById<EditText>(R.id.edit_company).text.toString()
-        val specialty = findViewById<Spinner>(R.id.spinner_specialty).selectedItem.toString()
-        val rfc = findViewById<EditText>(R.id.edit_rfc).text.toString()
-        val latitude = findViewById<EditText>(R.id.edit_latitude).text.toString()
-        val longitude = findViewById<EditText>(R.id.edit_longitude).text.toString()
-        val secretQuestion = findViewById<EditText>(R.id.edit_secret_question).text.toString()
-        val secretAnswer = findViewById<EditText>(R.id.edit_secret_answer).text.toString()
+        val name = editName.text.toString()
+        val lastname = editLastname.text.toString()
+        val phone = editPhone.text.toString()
+        val email = editEmail.text.toString()
+        val password = editPassword.text.toString()
+        val companyName = editCompanyName.text.toString()
+        val specialty = spinnerSpecialty.selectedItem?.toString() ?: ""
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || secretQuestion.isEmpty() || secretAnswer.isEmpty()) {
-            Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || specialty.isEmpty() || specialty == "Selecciona una especialidad") {
+            Toast.makeText(this, "❌ Por favor, completa todos los campos y selecciona una especialidad", Toast.LENGTH_SHORT).show()
             return
         }
 
-        auth.signInAnonymously().addOnSuccessListener { result ->
-            val userId = result.user?.uid
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { authTask ->
+                if (authTask.isSuccessful) {
+                    val userId = auth.currentUser?.uid
+                    val contractorData = hashMapOf(
+                        "name" to name,
+                        "lastname" to lastname,
+                        "phone" to phone,
+                        "email" to email,
+                        "companyName" to companyName,
+                        "specialty" to specialty,
+                        "rfc" to editRFC.text.toString(),
+                        "latitude" to editLatitude.text.toString(),
+                        "longitude" to editLongitude.text.toString(),
+                        "userType" to "contractor"
+                    )
 
-            val contractorData = hashMapOf(
-                "name" to name,
-                "lastname" to lastname,
-                "phone" to phone,
-                "email" to email,
-                "password" to password,
-                "companyName" to companyName,
-                "specialty" to specialty,
-                "rfc" to rfc,
-                "latitude" to latitude,
-                "longitude" to longitude,
-                "secretQuestion" to secretQuestion,
-                "secretAnswer" to secretAnswer
-            )
-
-            FirebaseDatabase.getInstance().getReference("Contractors")
-                .child(userId!!)
-                .setValue(contractorData)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "✅ Registro exitoso", Toast.LENGTH_LONG).show()
-                    finish()
+                    FirebaseDatabase.getInstance().getReference("Users")
+                        .child(userId!!)
+                        .setValue(contractorData)
+                        .addOnCompleteListener { dbTask ->
+                            if (dbTask.isSuccessful) {
+                                Toast.makeText(this, "✅ Contratista registrado exitosamente", Toast.LENGTH_LONG).show()
+                                startActivity(Intent(this, PublicationActivity::class.java)) // 📌 Redirección
+                                finish()
+                            } else {
+                                Toast.makeText(this, "❌ Error al guardar datos en Firebase", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(this, "❌ Error en la autenticación: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
                 }
-                .addOnFailureListener {
-                    Toast.makeText(this, "❌ Error al registrar", Toast.LENGTH_LONG).show()
-                }
-        }.addOnFailureListener {
-            Toast.makeText(this, "❌ Error al generar sesión anónima", Toast.LENGTH_LONG).show()
-        }
+            }
     }
+
 }

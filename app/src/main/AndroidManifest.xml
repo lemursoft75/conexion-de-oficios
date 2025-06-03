@@ -28,15 +28,22 @@
             </intent-filter>
         </activity>
 
-        <!-- 📌 Otras actividades -->
+        <!-- 📌 Pantalla de inicio de sesión -->
         <activity android:name=".activities.LoginActivity"/>
-        <activity android:name=".activities.RegisterActivity"/>
+
+        <!-- 📌 Registro -->
         <activity android:name=".activities.RegisterContractorActivity" />
         <activity android:name=".activities.RegisterClientActivity" />
+
+        <!-- 📌 Directorio y detalles de contratistas -->
         <activity android:name=".activities.DirectoryActivity"/>
-        <!--<activity android:name=".activities.PublishAdActivity"/>-->
         <activity android:name=".activities.ContractorDetailActivity"/>
+
+        <!-- 📌 Publicación de anuncios por contratistas -->
+        <activity android:name=".activities.PublicationActivity"/>
+
+        <!-- 📌 Configuración (opcional, descomentarlo si se necesita) -->
         <!--<activity android:name=".activities.SettingsActivity"/>-->
 
-   </application>
+    </application>
 </manifest>

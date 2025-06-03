@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog // 📌 Importación correcta
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.javipena.conexiondeoficios.R
 
 class LoginActivity : AppCompatActivity() {
@@ -24,7 +26,7 @@ class LoginActivity : AppCompatActivity() {
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login) // 📌 Botón para sesión anónima
 
-        // 📌 Inicio de sesión con correo y contraseña
+        // 📌 Inicio de sesión con correo y contraseña, verificando si es cliente o contratista
         btnLogin.setOnClickListener {
             val email = username.text.toString()
             val pass = password.text.toString()
@@ -33,9 +35,19 @@ class LoginActivity : AppCompatActivity() {
                 auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "✅ Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this, DirectoryActivity::class.java))
-                            finish()
+                            val userId = auth.currentUser?.uid
+                            FirebaseDatabase.getInstance().getReference("Users")
+                                .child(userId!!)
+                                .child("userType")
+                                .get().addOnSuccessListener { snapshot ->
+                                    val userType = snapshot.value.toString()
+                                    if (userType == "contractor") {
+                                        startActivity(Intent(this, PublicationActivity::class.java)) // 📌 Redirige a la publicación de anuncios
+                                    } else {
+                                        startActivity(Intent(this, DirectoryActivity::class.java)) // 📌 Redirige al directorio
+                                    }
+                                    finish()
+                                }
                         } else {
                             Toast.makeText(this, "❌ Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                         }
@@ -59,9 +71,18 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-        // 📌 Ir a la pantalla de registro
+        // 📌 Registro con opción para Cliente o Contratista
         btnRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            val options = arrayOf("Registrar como Cliente", "Registrar como Contratista")
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Selecciona una opción")
+            builder.setItems(options) { _, selectedIndex ->
+                when (selectedIndex) {
+                    0 -> startActivity(Intent(this, RegisterClientActivity::class.java)) // 📌 Cliente
+                    1 -> startActivity(Intent(this, RegisterContractorActivity::class.java)) // 📌 Contratista
+                }
+            }
+            builder.show()
         }
     }
 }
