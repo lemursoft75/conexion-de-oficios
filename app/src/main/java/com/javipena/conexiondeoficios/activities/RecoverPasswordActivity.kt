@@ -5,36 +5,45 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.FirebaseAuth
 import com.javipena.conexiondeoficios.R
 
 class RecoverPasswordActivity : AppCompatActivity() {
+    private lateinit var editEmail: EditText
+    private lateinit var btnRecover: Button
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recover_password)
 
-        val secretQuestion = findViewById<EditText>(R.id.edit_secret_question)
-        val secretAnswer = findViewById<EditText>(R.id.edit_secret_answer)
-        val btnRecover = findViewById<Button>(R.id.btn_recover)
+        auth = FirebaseAuth.getInstance()
+        editEmail = findViewById(R.id.edit_email)
+        btnRecover = findViewById(R.id.btn_recover)
 
         btnRecover.setOnClickListener {
-            val questionInput = secretQuestion.text.toString()
-            val answerInput = secretAnswer.text.toString()
+            val emailInput = editEmail.text.toString()
 
-            FirebaseDatabase.getInstance().getReference("Users").child("secret_question").get()
-                .addOnSuccessListener { dataSnapshot ->
-                    val storedAnswer = dataSnapshot.child("secret_answer").value.toString()
-
-                    if (storedAnswer == answerInput) {
-                        Toast.makeText(this, "Contraseña enviada a tu correo", Toast.LENGTH_SHORT).show()
-                        // Aquí iría la lógica para enviar la contraseña por email
-                    } else {
-                        Toast.makeText(this, "Respuesta incorrecta", Toast.LENGTH_SHORT).show()
+            if (emailInput.isEmpty()) {
+                Toast.makeText(this, "⚠ Ingresa tu correo para recuperar la contraseña", Toast.LENGTH_SHORT).show()
+            } else {
+                auth.sendPasswordResetEmail(emailInput)
+                    .addOnSuccessListener {
+                        showSuccessDialog() // 📌 Mensaje de éxito más claro
                     }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Error al verificar la respuesta", Toast.LENGTH_SHORT).show()
-                }
+                    .addOnFailureListener { exception ->
+                        Toast.makeText(this, "❌ Error al enviar correo: ${exception.message}", Toast.LENGTH_LONG).show()
+                    }
+            }
         }
+    }
+
+    private fun showSuccessDialog() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("📩 Recuperación de Contraseña")
+        builder.setMessage("Hemos enviado un email con instrucciones para restablecer tu contraseña.")
+        builder.setPositiveButton("Aceptar") { _, _ -> finish() }
+        builder.setCancelable(false)
+        builder.show()
     }
 }

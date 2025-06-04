@@ -2,7 +2,9 @@ package com.javipena.conexiondeoficios.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -14,13 +16,12 @@ class RegisterContractorActivity : AppCompatActivity() {
     private lateinit var editPhone: EditText
     private lateinit var editEmail: EditText
     private lateinit var editPassword: EditText
+    private lateinit var editConfirmPassword: EditText
     private lateinit var editCompanyName: EditText
     private lateinit var spinnerSpecialty: Spinner
     private lateinit var editRFC: EditText
     private lateinit var editLatitude: EditText
     private lateinit var editLongitude: EditText
-    private lateinit var editSecretQuestion: EditText
-    private lateinit var editSecretAnswer: EditText
     private lateinit var btnRegister: Button
     private lateinit var auth: FirebaseAuth
 
@@ -34,6 +35,7 @@ class RegisterContractorActivity : AppCompatActivity() {
         editPhone = findViewById(R.id.edit_phone)
         editEmail = findViewById(R.id.edit_email)
         editPassword = findViewById(R.id.edit_password)
+        editConfirmPassword = findViewById(R.id.edit_confirm_password)
         editCompanyName = findViewById(R.id.edit_company)
         spinnerSpecialty = findViewById(R.id.spinner_specialty)
         editRFC = findViewById(R.id.edit_rfc)
@@ -58,6 +60,7 @@ class RegisterContractorActivity : AppCompatActivity() {
         val phone = editPhone.text.toString()
         val email = editEmail.text.toString()
         val password = editPassword.text.toString()
+        val confirmPassword = editConfirmPassword.text.toString()
         val companyName = editCompanyName.text.toString()
         val specialty = spinnerSpecialty.selectedItem?.toString() ?: ""
 
@@ -66,9 +69,17 @@ class RegisterContractorActivity : AppCompatActivity() {
             return
         }
 
+        // 📌 Validar que la contraseña y confirmación coincidan
+        if (password != confirmPassword) {
+            Toast.makeText(this, "⚠ Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
+                    Log.d("Register", "✅ Usuario creado en Firebase Authentication")
+
                     val userId = auth.currentUser?.uid
                     val contractorData = hashMapOf(
                         "name" to name,
@@ -88,17 +99,40 @@ class RegisterContractorActivity : AppCompatActivity() {
                         .setValue(contractorData)
                         .addOnCompleteListener { dbTask ->
                             if (dbTask.isSuccessful) {
-                                Toast.makeText(this, "✅ Contratista registrado exitosamente", Toast.LENGTH_LONG).show()
-                                startActivity(Intent(this, PublicationActivity::class.java)) // 📌 Redirección
-                                finish()
+                                Log.d("Register", "✅ Datos guardados en Firebase Database")
+                                runOnUiThread {
+                                    showSuccessDialog()
+                                }
                             } else {
+                                Log.e("Register", "❌ Error al guardar datos en Firebase Database: ${dbTask.exception?.message}")
                                 Toast.makeText(this, "❌ Error al guardar datos en Firebase", Toast.LENGTH_LONG).show()
                             }
                         }
                 } else {
+                    Log.e("Register", "❌ Error en autenticación: ${authTask.exception?.message}")
                     Toast.makeText(this, "❌ Error en la autenticación: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
+    private fun showSuccessDialog() {
+        runOnUiThread {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("✅ Registro Completo")
+            builder.setMessage("Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.")
+            builder.setPositiveButton("Ir a Inicio de Sesión") { _, _ ->
+                redirectToLogin()
+            }
+            builder.setCancelable(false)
+            val dialog = builder.create()
+            dialog.show()
+        }
+    }
+
+    private fun redirectToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // 📌 Borra actividades anteriores
+        startActivity(intent)
+        finish()
+    }
 }

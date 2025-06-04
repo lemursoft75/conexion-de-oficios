@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -46,24 +47,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Campo de Confirmación de Contraseña -->
     <EditText
-        android:id="@+id/edit_secret_question"
+        android:id="@+id/edit_confirm_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Pregunta secreta"
+        android:hint="Confirmar contraseña"
+        android:inputType="textPassword"
         app:layout_constraintTop_toBottomOf="@id/edit_password"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <EditText
-        android:id="@+id/edit_secret_answer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Respuesta secreta"
-        app:layout_constraintTop_toBottomOf="@id/edit_secret_question"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
 
     <!-- Botón de Registro -->
     <Button
@@ -71,9 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Registrar"
-        app:layout_constraintTop_toBottomOf="@id/edit_secret_answer"
+        app:layout_constraintTop_toBottomOf="@id/edit_confirm_password"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
