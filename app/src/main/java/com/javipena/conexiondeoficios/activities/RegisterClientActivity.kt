@@ -2,6 +2,7 @@ package com.javipena.conexiondeoficios.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.javipena.conexiondeoficios.R
+
 
 class RegisterClientActivity : AppCompatActivity() {
     private lateinit var editName: EditText
@@ -91,17 +93,18 @@ class RegisterClientActivity : AppCompatActivity() {
     }
 
     private fun showSuccessDialog() {
-        runOnUiThread {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("✅ Registro Completo")
-            builder.setMessage("Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.")
-            builder.setPositiveButton("Ir a Inicio de Sesión") { _, _ ->
-                redirectToLogin()
-            }
-            builder.setCancelable(false)
-            val dialog = builder.create()
-            dialog.show()
-        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("✅ Registro Completo")
+            .setMessage("Tu cuenta ha sido creada exitosamente. Serás redirigido en unos segundos...")
+            .setCancelable(false)
+            .create()
+
+        dialog.show()
+
+        Handler(mainLooper).postDelayed({
+            dialog.dismiss()
+            redirectToLogin()
+        }, 3000) // Espera 3 segundos y redirige
     }
 
     private fun redirectToLogin() {
