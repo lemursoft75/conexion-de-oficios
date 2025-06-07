@@ -6,31 +6,39 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
-import com.javipena.conexiondeoficios.Ad // 📌 CAMBIO 1: Asegúrate de importar tu data class Ad
+// 📌 NOTA: Ya no necesitamos importar FirebaseStorage
+import com.javipena.conexiondeoficios.Ad
 import com.javipena.conexiondeoficios.R
 
 class PublicationActivity : AppCompatActivity() {
+
+    // --- Variables de la UI ---
     private lateinit var editAdText: EditText
     private lateinit var btnPublish: Button
     private lateinit var btnUploadMedia: Button
     private lateinit var btnBackToMenu: Button
     private lateinit var imagePreview: ImageView
     private lateinit var progressBar: ProgressBar
+
+    // --- Variables de Firebase y de estado ---
     private lateinit var auth: FirebaseAuth
     private var mediaUri: Uri? = null
-
-    // Debes tener esta clase en tu proyecto, por ejemplo en un archivo Models.kt
-    // @Parcelize
-    // data class Ad(val contractorId: String = "", ..., val mediaUrl: String = "") : Parcelable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_publication)
+        title = "Crear Anuncio"
 
         auth = FirebaseAuth.getInstance()
         editAdText = findViewById(R.id.edit_ad_text)
@@ -38,8 +46,12 @@ class PublicationActivity : AppCompatActivity() {
         btnUploadMedia = findViewById(R.id.btn_upload_media)
         btnBackToMenu = findViewById(R.id.btn_back_to_menu)
         imagePreview = findViewById(R.id.image_preview)
-        progressBar = findViewById(R.id.progress_bar_publication) // Asegúrate de tener un ProgressBar en tu XML
+        progressBar = findViewById(R.id.progress_bar_publication)
 
+        setupClickListeners()
+    }
+
+    private fun setupClickListeners() {
         btnUploadMedia.setOnClickListener { openFileChooser() }
         btnPublish.setOnClickListener { publishAd() }
         btnBackToMenu.setOnClickListener { returnToMenu() }
@@ -55,6 +67,7 @@ class PublicationActivity : AppCompatActivity() {
         if (requestCode == REQUEST_MEDIA_PICK && resultCode == Activity.RESULT_OK && data?.data != null) {
             mediaUri = data.data
             imagePreview.setImageURI(mediaUri)
+            imagePreview.visibility = View.VISIBLE
         }
     }
 
@@ -68,20 +81,17 @@ class PublicationActivity : AppCompatActivity() {
         setLoading(true)
         val userId = auth.currentUser?.uid ?: return
 
-        // 1. Obtener los datos del perfil del contratista
         FirebaseDatabase.getInstance().getReference("Users").child(userId).get()
             .addOnSuccessListener { userSnapshot ->
                 val phone = userSnapshot.child("phone").value.toString()
                 val latitude = userSnapshot.child("latitude").value.toString()
                 val longitude = userSnapshot.child("longitude").value.toString()
                 val specialty = userSnapshot.child("specialty").value.toString()
-
-                // 2. 📌 CAMBIO 2: Generar un ID único para el anuncio ANTES de subir la imagen.
                 val adId = FirebaseDatabase.getInstance().getReference("Ads").push().key ?: ""
 
-                // 3. Proceder a guardar
                 if (mediaUri != null) {
-                    uploadMediaAndSaveAd(adId, userId, adText, phone, latitude, longitude, specialty)
+                    // 📌 CAMBIO: Llamamos a la nueva función de Cloudinary
+                    uploadMediaToCloudinaryAndSaveAd(adId, userId, adText, phone, latitude, longitude, specialty)
                 } else {
                     saveAdData(adId, userId, adText, phone, latitude, longitude, specialty, null)
                 }
@@ -93,28 +103,40 @@ class PublicationActivity : AppCompatActivity() {
             }
     }
 
-    private fun uploadMediaAndSaveAd(adId: String, userId: String, adText: String, phone: String, latitude: String, longitude: String, specialty: String) {
-        // 📌 CAMBIO 3: Usar el ID único del anuncio para el nombre del archivo.
-        // Esto evita que una imagen nueva reemplace a una antigua.
-        val storageRef = FirebaseStorage.getInstance().reference.child("ads_media/$adId")
+    /**
+     * 📌 FUNCIÓN REEMPLAZADA: Sube la imagen a Cloudinary y, si tiene éxito, llama a guardar los datos.
+     */
+    private fun uploadMediaToCloudinaryAndSaveAd(adId: String, userId: String, adText: String, phone: String, latitude: String, longitude: String, specialty: String) {
+        mediaUri?.let { uri ->
+            MediaManager.get().upload(uri)
+                .option("public_id", adId)
+                .option("folder", "ads_media")
+                .callback(object : UploadCallback {
+                    override fun onSuccess(requestId: String, resultData: Map<*, *>?) {
+                        val secureUrl = resultData?.get("secure_url").toString()
+                        Log.d("PublicationActivity", "Imagen subida a Cloudinary: $secureUrl")
+                        saveAdData(adId, userId, adText, phone, latitude, longitude, specialty, secureUrl)
+                    }
 
-        mediaUri?.let {
-            storageRef.putFile(it).addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    saveAdData(adId, userId, adText, phone, latitude, longitude, specialty, uri.toString())
-                }
-            }.addOnFailureListener {
-                Log.e("PublicationActivity", "Error al subir imagen: ${it.message}")
-                Toast.makeText(this, "Error al subir la imagen.", Toast.LENGTH_SHORT).show()
-                setLoading(false)
-            }
+                    override fun onError(requestId: String, error: ErrorInfo) {
+                        Log.e("PublicationActivity", "Error al subir a Cloudinary: ${error.description}")
+                        Toast.makeText(baseContext, "Error al subir la imagen.", Toast.LENGTH_SHORT).show()
+                        setLoading(false)
+                    }
+
+                    override fun onStart(requestId: String?) {}
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                })
+                .dispatch()
         }
     }
 
+    /**
+     * Guarda el objeto 'Ad' completo en la Realtime Database. Esta función no cambia.
+     */
     private fun saveAdData(adId: String, userId: String, adText: String, phone: String, latitude: String, longitude: String, specialty: String, mediaUrl: String?) {
         val databaseRef = FirebaseDatabase.getInstance().getReference("Ads")
-
-        // 📌 CAMBIO 4: Usar la data class 'Ad' para crear el objeto. Es más limpio y seguro.
         val adData = Ad(
             contractorId = userId,
             adText = adText,
@@ -122,30 +144,30 @@ class PublicationActivity : AppCompatActivity() {
             latitude = latitude,
             longitude = longitude,
             specialty = specialty,
-            mediaUrl = mediaUrl ?: ""
+            mediaUrl = mediaUrl
         )
 
-        databaseRef.child(adId).setValue(adData).addOnSuccessListener {
-            Log.d("PublicationActivity", "Anuncio publicado con éxito.")
-            Toast.makeText(this, "✅ Anuncio publicado correctamente", Toast.LENGTH_LONG).show()
-            returnToMenu()
-        }.addOnFailureListener {
-            Log.e("PublicationActivity", "Error al guardar anuncio: ${it.message}")
-            Toast.makeText(this, "Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
-            setLoading(false)
-        }
+        databaseRef.child(adId).setValue(adData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "✅ Anuncio publicado correctamente", Toast.LENGTH_LONG).show()
+                returnToMenu()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
+                setLoading(false)
+            }
     }
 
     private fun setLoading(isLoading: Boolean) {
         progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         btnPublish.isEnabled = !isLoading
         btnUploadMedia.isEnabled = !isLoading
+        btnBackToMenu.isEnabled = !isLoading
     }
 
-    // Dentro de PublicationActivity.kt
+
 
     private fun returnToMenu() {
-        // 📌 CAMBIO: Ahora vuelve al panel de control del contratista, no a una MainActivity genérica.
         val intent = Intent(this, ContractorDashboardActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

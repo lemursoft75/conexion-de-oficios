@@ -78,4 +78,6 @@ dependencies {
 
     implementation("androidx.recyclerview:recyclerview:1.3.2") // 📌 Agregar si falta
 
+    implementation ("com.cloudinary:cloudinary-android:2.4.0") // O la versión más reciente
+
 }

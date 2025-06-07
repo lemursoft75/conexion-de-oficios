@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,16 +28,12 @@
         </activity>
 
         <activity android:name=".activities.LoginActivity"/>
-
         <activity android:name=".activities.RegisterContractorActivity" />
         <activity android:name=".activities.RegisterClientActivity" />
-
         <activity android:name=".activities.ContractorDashboardActivity" />
-
         <activity android:name=".activities.DirectoryActivity"/>
         <activity android:name=".activities.ContractorListActivity"/>
         <activity android:name=".activities.ContractorDetailActivity"/>
-
         <activity android:name=".activities.PublicationActivity"/>
         <activity android:name=".activities.MyAdsActivity"/>
 
