@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 📌 Permisos necesarios -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -18,7 +17,6 @@
         android:theme="@style/Theme.ConexionDeOficios"
         tools:targetApi="34">
 
-        <!-- 📌 SplashActivity es la primera pantalla -->
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
@@ -28,22 +26,19 @@
             </intent-filter>
         </activity>
 
-        <!-- 📌 Pantalla de inicio de sesión -->
         <activity android:name=".activities.LoginActivity"/>
 
-        <!-- 📌 Registro -->
         <activity android:name=".activities.RegisterContractorActivity" />
         <activity android:name=".activities.RegisterClientActivity" />
 
-        <!-- 📌 Directorio y detalles de contratistas -->
+        <activity android:name=".activities.ContractorDashboardActivity" />
+
         <activity android:name=".activities.DirectoryActivity"/>
+        <activity android:name=".activities.ContractorListActivity"/>
         <activity android:name=".activities.ContractorDetailActivity"/>
 
-        <!-- 📌 Publicación de anuncios por contratistas -->
         <activity android:name=".activities.PublicationActivity"/>
-
-        <!-- 📌 Configuración (opcional, descomentarlo si se necesita) -->
-        <!--<activity android:name=".activities.SettingsActivity"/>-->
+        <activity android:name=".activities.MyAdsActivity"/>
 
     </application>
 </manifest>

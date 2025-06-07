@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog // 📌 Importación correcta
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -18,36 +18,46 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        auth = FirebaseAuth.getInstance() // 📌 Inicializa Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
         val username = findViewById<EditText>(R.id.edit_username)
         val password = findViewById<EditText>(R.id.edit_password)
         val btnLogin = findViewById<Button>(R.id.btn_login)
         val btnRegister = findViewById<Button>(R.id.btn_register)
-        val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login) // 📌 Botón para sesión anónima
+        val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login)
 
-        // 📌 Inicio de sesión con correo y contraseña, verificando si es cliente o contratista
         btnLogin.setOnClickListener {
-            val email = username.text.toString()
-            val pass = password.text.toString()
+            val email = username.text.toString().trim()
+            val pass = password.text.toString().trim()
 
             if (email.isNotEmpty() && pass.isNotEmpty()) {
                 auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val userId = auth.currentUser?.uid
-                            FirebaseDatabase.getInstance().getReference("Users")
-                                .child(userId!!)
-                                .child("userType")
-                                .get().addOnSuccessListener { snapshot ->
-                                    val userType = snapshot.value.toString()
-                                    if (userType == "contractor") {
-                                        startActivity(Intent(this, PublicationActivity::class.java)) // 📌 Redirige a la publicación de anuncios
-                                    } else {
-                                        startActivity(Intent(this, DirectoryActivity::class.java)) // 📌 Redirige al directorio
+                            if (userId != null) {
+                                FirebaseDatabase.getInstance().getReference("Users")
+                                    .child(userId)
+                                    .child("userType")
+                                    .get().addOnSuccessListener { snapshot ->
+                                        val userType = snapshot.value.toString()
+
+                                        if (userType == "contractor") {
+                                            // 📌 CAMBIO CRÍTICO: El contratista ya no va a la pantalla de publicación,
+                                            // sino a su nuevo Panel de Control.
+                                            startActivity(Intent(this, ContractorDashboardActivity::class.java))
+                                        } else {
+                                            // El cliente va al directorio, esto está correcto.
+                                            startActivity(Intent(this, DirectoryActivity::class.java))
+                                        }
+                                        finish() // Cierra la actividad de Login
+                                    }.addOnFailureListener {
+                                        // En caso de que no se pueda leer el tipo de usuario, enviar al directorio por defecto
+                                        Toast.makeText(this, "No se pudo verificar el tipo de usuario, iniciando como cliente.", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, DirectoryActivity::class.java))
+                                        finish()
                                     }
-                                    finish()
-                                }
+                            }
                         } else {
                             Toast.makeText(this, "❌ Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                         }
@@ -57,12 +67,10 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // 📌 Inicio de sesión anónimo al tocar el botón
         btnGuestLogin.setOnClickListener {
             auth.signInAnonymously()
-                .addOnSuccessListener { result ->
-                    val userId = result.user?.uid // 📌 UID asignado por Firebase
-                    Toast.makeText(this, "✅ Sesión anónima iniciada: $userId", Toast.LENGTH_LONG).show()
+                .addOnSuccessListener {
+                    Toast.makeText(this, "✅ Sesión anónima iniciada.", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, DirectoryActivity::class.java))
                     finish()
                 }
@@ -71,18 +79,17 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-        // 📌 Registro con opción para Cliente o Contratista
         btnRegister.setOnClickListener {
             val options = arrayOf("Registrar como Cliente", "Registrar como Contratista")
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Selecciona una opción")
-            builder.setItems(options) { _, selectedIndex ->
-                when (selectedIndex) {
-                    0 -> startActivity(Intent(this, RegisterClientActivity::class.java)) // 📌 Cliente
-                    1 -> startActivity(Intent(this, RegisterContractorActivity::class.java)) // 📌 Contratista
+            AlertDialog.Builder(this)
+                .setTitle("Selecciona tu tipo de cuenta")
+                .setItems(options) { _, selectedIndex ->
+                    when (selectedIndex) {
+                        0 -> startActivity(Intent(this, RegisterClientActivity::class.java))
+                        1 -> startActivity(Intent(this, RegisterContractorActivity::class.java))
+                    }
                 }
-            }
-            builder.show()
+                .show()
         }
     }
 }

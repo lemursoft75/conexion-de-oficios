@@ -2,6 +2,7 @@ plugins {
     id("com.android.application") // 📌 Plugin de aplicación
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt") // Necesario para Room
+    id("kotlin-parcelize")
 }
 
 apply(plugin = "com.google.gms.google-services") // 📌 Fuera del bloque `plugins {}`
