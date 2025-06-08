@@ -46,7 +46,7 @@ class RegisterContractorActivity : AppCompatActivity() {
         btnRegister = findViewById(R.id.btn_register)
 
         // 📌 Cargar especialidades en el Spinner
-        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor", "Otro")
+        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, specialties)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecialty.adapter = adapter

@@ -40,6 +40,8 @@
         <activity android:name=".activities.PublicationActivity"/>
         <activity android:name=".activities.MyAdsActivity"/>
         <activity android:name=".activities.NearbyAdsActivity"/>
+        <activity android:name=".activities.RecoverPasswordActivity" />
+
 
     </application>
 </manifest>

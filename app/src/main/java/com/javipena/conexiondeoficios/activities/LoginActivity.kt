@@ -27,7 +27,8 @@ class LoginActivity : AppCompatActivity() {
         val btnLogin = findViewById<Button>(R.id.btn_login)
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login)
-        val textForgotPassword = findViewById<TextView>(R.id.btn_recover_password)
+        val textForgotPassword = findViewById<Button>(R.id.btn_recover_password)
+
 
         // Listener para el botón de Iniciar Sesión
         btnLogin.setOnClickListener {

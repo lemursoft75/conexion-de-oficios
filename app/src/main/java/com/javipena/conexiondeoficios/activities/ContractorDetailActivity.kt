@@ -1,5 +1,6 @@
 package com.javipena.conexiondeoficios.activities
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -11,7 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide // 📌 IMPORTANTE: Añade esta importación
+import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -25,13 +26,14 @@ class ContractorDetailActivity : AppCompatActivity() {
     private lateinit var textContractorName: TextView
     private lateinit var textCompanyName: TextView
     private lateinit var textAdDescription: TextView
-    private lateinit var imageAdDetail: ImageView // 📌 Nueva referencia
+    private lateinit var imageAdDetail: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contractor_detail)
+        title = "Detalle del Anuncio"
 
-        // 📌 PASO 1: Recibir el objeto 'Ad' completo que se envió desde la lista.
+        // Recibir el objeto 'Ad' que se envió desde el adaptador
         val ad = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("AD_DETAIL", Ad::class.java)
         } else {
@@ -39,44 +41,47 @@ class ContractorDetailActivity : AppCompatActivity() {
             intent.getParcelableExtra<Ad>("AD_DETAIL")
         }
 
+        // Si el anuncio es nulo, mostrar error y cerrar la pantalla
         if (ad == null) {
             Toast.makeText(this, "Error: No se pudieron cargar los datos del anuncio.", Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        // 📌 PASO 2: Referencias a las vistas
+        // Referencias a las vistas del layout
         textContractorName = findViewById(R.id.text_contractor_name)
         textCompanyName = findViewById(R.id.text_company_name)
         textAdDescription = findViewById(R.id.text_ad_description)
-        imageAdDetail = findViewById(R.id.image_ad_detail) // 📌 Referencia al ImageView
+        imageAdDetail = findViewById(R.id.image_ad_detail)
         val textPhone = findViewById<TextView>(R.id.text_phone)
         val imageMap = findViewById<ImageView>(R.id.image_map)
         val btnWhatsApp = findViewById<Button>(R.id.btn_whatsapp)
         val btnBack = findViewById<Button>(R.id.btn_back)
 
-        // 📌 PASO 3: Mostrar información del anuncio
+        // Asignar datos del anuncio a las vistas
         textAdDescription.text = ad.adText
         textPhone.text = "Teléfono: ${ad.phone}"
 
-        // 📌 PASO 4: Cargar la imagen con Glide
+        // Cargar la imagen del anuncio con Glide si existe
         if (!ad.mediaUrl.isNullOrEmpty()) {
             imageAdDetail.visibility = View.VISIBLE
             Glide.with(this)
                 .load(ad.mediaUrl)
+                .placeholder(R.drawable.ic_image_placeholder) // Opcional: un placeholder mientras carga
+                .error(R.drawable.ic_image_error) // Opcional: una imagen de error si falla la carga
                 .into(imageAdDetail)
         } else {
             imageAdDetail.visibility = View.GONE
         }
 
-        // 📌 PASO 5: Buscar perfil del contratista
+        // Buscar y mostrar el perfil del contratista
         if (ad.contractorId.isNotEmpty()) {
             fetchContractorProfile(ad.contractorId)
         } else {
             textContractorName.text = "Contratista Anónimo"
         }
 
-        // 📌 PASO 6: Acciones de los Botones
+        // --- Configuración de los botones ---
         btnWhatsApp.setOnClickListener {
             val phoneNumber = ad.phone.replace(Regex("[^0-9]"), "")
             val url = "https://wa.me/$phoneNumber"
@@ -88,12 +93,16 @@ class ContractorDetailActivity : AppCompatActivity() {
         }
 
         imageMap.setOnClickListener {
-            val uri = "geo:${ad.latitude},${ad.longitude}?q=${ad.latitude},${ad.longitude}(Ubicación)"
-            val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-            if (mapIntent.resolveActivity(packageManager) != null) {
+            // 📌 ESTA ES LA LÍNEA CORREGIDA PARA EL MAPA
+            val gmmIntentUri = Uri.parse("geo:${ad.latitude},${ad.longitude}?q=${ad.latitude},${ad.longitude}(${textContractorName.text})")
+
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+
+            try {
                 startActivity(mapIntent)
-            } else {
-                Toast.makeText(this, "No se encontró una aplicación de mapas.", Toast.LENGTH_SHORT).show()
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(this, "No se encontró la aplicación de Google Maps.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -102,9 +111,6 @@ class ContractorDetailActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Busca en la base de datos el perfil del contratista usando su ID.
-     */
     private fun fetchContractorProfile(userId: String) {
         val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
 
