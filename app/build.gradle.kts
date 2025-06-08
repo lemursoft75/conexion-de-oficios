@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application") // 📌 Plugin de aplicación
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt") // Necesario para Room
+    id("kotlin-kapt") // Necesario para Room y ahora para Glide
     id("kotlin-parcelize")
 }
 
@@ -76,8 +76,11 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
-    implementation("androidx.recyclerview:recyclerview:1.3.2") // 📌 Agregar si falta
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
-    implementation ("com.cloudinary:cloudinary-android:2.4.0") // O la versión más reciente
+    implementation ("com.cloudinary:cloudinary-android:2.4.0")
 
+    // 📌 AÑADIDO: Dependencias para Glide (cargar imágenes desde URL)
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    kapt ("com.github.bumptech.glide:compiler:4.16.0")
 }

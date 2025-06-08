@@ -37,6 +37,19 @@
             app:layout_constraintTop_toBottomOf="@id/text_contractor_name"
             tools:text="Plomería Express S.A. de C.V." />
 
+        <!-- Imagen destacada del contratista -->
+        <ImageView
+            android:id="@+id/image_ad_detail"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_company_name" />
+
+
         <View
             android:id="@+id/divider"
             android:layout_width="0dp"
@@ -45,7 +58,7 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_company_name" />
+            app:layout_constraintTop_toBottomOf="@id/image_ad_detail" />
 
         <TextView
             android:id="@+id/text_ad_description"

@@ -4,8 +4,10 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide // 📌 IMPORTANTE: Añade esta importación
 import com.javipena.conexiondeoficios.Ad
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.activities.ContractorDetailActivity
@@ -18,12 +20,13 @@ class AdsAdapter(private val adsList: List<Ad>) : RecyclerView.Adapter<AdsAdapte
 
     /**
      * Esta clase interna representa la vista de un único item en la lista.
-     * Contiene las referencias a los elementos de la UI del layout del item (ej. TextViews).
+     * Contiene las referencias a los elementos de la UI del layout del item (ej. TextViews, ImageView).
      */
     class AdViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val adTextView: TextView = itemView.findViewById(R.id.text_ad_content)
         val phoneTextView: TextView = itemView.findViewById(R.id.text_ad_phone)
         val specialtyTextView: TextView = itemView.findViewById(R.id.text_ad_specialty)
+        val adImageView: ImageView = itemView.findViewById(R.id.image_ad_item) // 📌 ImageView añadido
     }
 
     /**
@@ -42,16 +45,24 @@ class AdsAdapter(private val adsList: List<Ad>) : RecyclerView.Adapter<AdsAdapte
     override fun onBindViewHolder(holder: AdViewHolder, position: Int) {
         val ad = adsList[position]
 
-        // Poner los datos del anuncio en los TextViews del item.
         holder.adTextView.text = ad.adText
         holder.phoneTextView.text = "Contacto: ${ad.phone}"
         holder.specialtyTextView.text = ad.specialty
+
+        // 📌 Carga la imagen con Glide si hay una URL disponible
+        if (!ad.mediaUrl.isNullOrEmpty()) {
+            holder.adImageView.visibility = View.VISIBLE
+            Glide.with(holder.itemView.context)
+                .load(ad.mediaUrl)
+                .into(holder.adImageView)
+        } else {
+            holder.adImageView.visibility = View.GONE
+        }
 
         // Configurar el click listener para todo el item.
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ContractorDetailActivity::class.java).apply {
-                // Pasamos el objeto 'Ad' completo a la pantalla de detalle.
                 putExtra("AD_DETAIL", ad)
             }
             context.startActivity(intent)

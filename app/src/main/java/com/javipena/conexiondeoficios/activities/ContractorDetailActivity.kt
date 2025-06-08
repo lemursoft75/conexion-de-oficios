@@ -4,12 +4,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide // 📌 IMPORTANTE: Añade esta importación
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -17,20 +19,19 @@ import com.google.firebase.database.ValueEventListener
 import com.javipena.conexiondeoficios.Ad
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.models.Contractor
-import android.util.Log
 
 class ContractorDetailActivity : AppCompatActivity() {
 
     private lateinit var textContractorName: TextView
     private lateinit var textCompanyName: TextView
     private lateinit var textAdDescription: TextView
+    private lateinit var imageAdDetail: ImageView // 📌 Nueva referencia
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contractor_detail)
 
         // 📌 PASO 1: Recibir el objeto 'Ad' completo que se envió desde la lista.
-        // Nota: Es importante que tu clase 'Ad' sea 'Parcelable' para que esto funcione.
         val ad = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("AD_DETAIL", Ad::class.java)
         } else {
@@ -38,38 +39,46 @@ class ContractorDetailActivity : AppCompatActivity() {
             intent.getParcelableExtra<Ad>("AD_DETAIL")
         }
 
-        // Si por alguna razón el anuncio no llega, mostramos un error y cerramos.
         if (ad == null) {
             Toast.makeText(this, "Error: No se pudieron cargar los datos del anuncio.", Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        // Referencias a las vistas del layout (asegúrate de que los IDs coincidan en tu XML)
+        // 📌 PASO 2: Referencias a las vistas
         textContractorName = findViewById(R.id.text_contractor_name)
         textCompanyName = findViewById(R.id.text_company_name)
         textAdDescription = findViewById(R.id.text_ad_description)
+        imageAdDetail = findViewById(R.id.image_ad_detail) // 📌 Referencia al ImageView
         val textPhone = findViewById<TextView>(R.id.text_phone)
         val imageMap = findViewById<ImageView>(R.id.image_map)
         val btnWhatsApp = findViewById<Button>(R.id.btn_whatsapp)
         val btnBack = findViewById<Button>(R.id.btn_back)
 
-        // 📌 PASO 2: Mostrar la información que ya tenemos del objeto 'Ad'.
+        // 📌 PASO 3: Mostrar información del anuncio
         textAdDescription.text = ad.adText
         textPhone.text = "Teléfono: ${ad.phone}"
 
-        // 📌 PASO 3: Usar el 'contractorId' del anuncio para buscar el perfil completo.
+        // 📌 PASO 4: Cargar la imagen con Glide
+        if (!ad.mediaUrl.isNullOrEmpty()) {
+            imageAdDetail.visibility = View.VISIBLE
+            Glide.with(this)
+                .load(ad.mediaUrl)
+                .into(imageAdDetail)
+        } else {
+            imageAdDetail.visibility = View.GONE
+        }
+
+        // 📌 PASO 5: Buscar perfil del contratista
         if (ad.contractorId.isNotEmpty()) {
             fetchContractorProfile(ad.contractorId)
         } else {
             textContractorName.text = "Contratista Anónimo"
         }
 
-        // --- Acciones de los Botones con Datos Reales ---
-
-        // Acción para abrir WhatsApp con el número REAL del anuncio.
+        // 📌 PASO 6: Acciones de los Botones
         btnWhatsApp.setOnClickListener {
-            val phoneNumber = ad.phone.replace(Regex("[^0-9]"), "") // Limpiar el número
+            val phoneNumber = ad.phone.replace(Regex("[^0-9]"), "")
             val url = "https://wa.me/$phoneNumber"
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -78,11 +87,9 @@ class ContractorDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Acción para abrir el mapa con las coordenadas REALES.
         imageMap.setOnClickListener {
             val uri = "geo:${ad.latitude},${ad.longitude}?q=${ad.latitude},${ad.longitude}(Ubicación)"
             val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-            // Comprueba si hay una app de mapas que pueda manejar el intent
             if (mapIntent.resolveActivity(packageManager) != null) {
                 startActivity(mapIntent)
             } else {
@@ -90,7 +97,6 @@ class ContractorDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Acción para regresar a la lista anterior.
         btnBack.setOnClickListener {
             finish()
         }
@@ -107,7 +113,6 @@ class ContractorDetailActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     val contractor = snapshot.getValue(Contractor::class.java)
                     if (contractor != null) {
-                        // 📌 PASO 4: Actualizar la UI con los datos del perfil encontrado.
                         textContractorName.text = "${contractor.name} ${contractor.lastname}"
                         if (contractor.companyName.isNotEmpty()) {
                             textCompanyName.text = contractor.companyName
