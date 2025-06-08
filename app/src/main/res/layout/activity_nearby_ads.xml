@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.NearbyAdsActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_nearby_ads"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        tools:listitem="@layout/list_item_ad" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_nearby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/text_no_results_nearby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="No se encontraron anuncios en un radio de 5 km."
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+</RelativeLayout>

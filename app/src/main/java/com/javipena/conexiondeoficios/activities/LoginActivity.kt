@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -20,12 +21,15 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
+        // Vinculación de todos los elementos de la UI
         val username = findViewById<EditText>(R.id.edit_username)
         val password = findViewById<EditText>(R.id.edit_password)
         val btnLogin = findViewById<Button>(R.id.btn_login)
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login)
+        val textForgotPassword = findViewById<TextView>(R.id.btn_recover_password)
 
+        // Listener para el botón de Iniciar Sesión
         btnLogin.setOnClickListener {
             val email = username.text.toString().trim()
             val pass = password.text.toString().trim()
@@ -36,24 +40,18 @@ class LoginActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             val userId = auth.currentUser?.uid
                             if (userId != null) {
-                                FirebaseDatabase.getInstance().getReference("Users")
-                                    .child(userId)
-                                    .child("userType")
+                                // Verificamos el tipo de usuario para redirigir a la pantalla correcta
+                                FirebaseDatabase.getInstance().getReference("Users").child(userId).child("userType")
                                     .get().addOnSuccessListener { snapshot ->
                                         val userType = snapshot.value.toString()
-
                                         if (userType == "contractor") {
-                                            // 📌 CAMBIO CRÍTICO: El contratista ya no va a la pantalla de publicación,
-                                            // sino a su nuevo Panel de Control.
                                             startActivity(Intent(this, ContractorDashboardActivity::class.java))
                                         } else {
-                                            // El cliente va al directorio, esto está correcto.
                                             startActivity(Intent(this, DirectoryActivity::class.java))
                                         }
                                         finish() // Cierra la actividad de Login
                                     }.addOnFailureListener {
-                                        // En caso de que no se pueda leer el tipo de usuario, enviar al directorio por defecto
-                                        Toast.makeText(this, "No se pudo verificar el tipo de usuario, iniciando como cliente.", Toast.LENGTH_SHORT).show()
+                                        // Por si falla la lectura, se va al directorio por defecto
                                         startActivity(Intent(this, DirectoryActivity::class.java))
                                         finish()
                                     }
@@ -67,6 +65,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
+        // Listener para entrar como invitado
         btnGuestLogin.setOnClickListener {
             auth.signInAnonymously()
                 .addOnSuccessListener {
@@ -79,6 +78,7 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
+        // Listener para el botón de registrarse
         btnRegister.setOnClickListener {
             val options = arrayOf("Registrar como Cliente", "Registrar como Contratista")
             AlertDialog.Builder(this)
@@ -90,6 +90,11 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
                 .show()
+        }
+
+        // Listener para el texto de "¿Olvidaste tu contraseña?"
+        textForgotPassword.setOnClickListener {
+            startActivity(Intent(this, RecoverPasswordActivity::class.java))
         }
     }
 }

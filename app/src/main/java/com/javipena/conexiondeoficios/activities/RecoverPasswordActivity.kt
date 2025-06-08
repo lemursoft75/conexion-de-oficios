@@ -1,9 +1,11 @@
 package com.javipena.conexiondeoficios.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.javipena.conexiondeoficios.R
@@ -22,28 +24,47 @@ class RecoverPasswordActivity : AppCompatActivity() {
         btnRecover = findViewById(R.id.btn_recover)
 
         btnRecover.setOnClickListener {
-            val emailInput = editEmail.text.toString()
-
-            if (emailInput.isEmpty()) {
-                Toast.makeText(this, "⚠ Ingresa tu correo para recuperar la contraseña", Toast.LENGTH_SHORT).show()
-            } else {
-                auth.sendPasswordResetEmail(emailInput)
-                    .addOnSuccessListener {
-                        showSuccessDialog() // 📌 Mensaje de éxito más claro
-                    }
-                    .addOnFailureListener { exception ->
-                        Toast.makeText(this, "❌ Error al enviar correo: ${exception.message}", Toast.LENGTH_LONG).show()
-                    }
-            }
+            recoverPassword()
         }
     }
 
+    private fun recoverPassword() {
+        val emailInput = editEmail.text.toString().trim()
+
+        if (emailInput.isEmpty()) {
+            Toast.makeText(this, "⚠ Ingresa tu correo electrónico", Toast.LENGTH_SHORT).show()
+            return // Detiene la ejecución si el campo está vacío
+        }
+
+        auth.sendPasswordResetEmail(emailInput)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // El correo se envió (o el usuario no existe, Firebase no lo revela)
+                    showSuccessDialog()
+                } else {
+                    // Muestra el error específico que dio Firebase
+                    val errorMessage = task.exception?.message ?: "Ocurrió un error desconocido."
+                    Toast.makeText(this, "❌ Error: $errorMessage", Toast.LENGTH_LONG).show()
+                }
+            }
+    }
+
     private fun showSuccessDialog() {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("📩 Recuperación de Contraseña")
-        builder.setMessage("Hemos enviado un email con instrucciones para restablecer tu contraseña.")
-        builder.setPositiveButton("Aceptar") { _, _ -> finish() }
-        builder.setCancelable(false)
-        builder.show()
+        // Asegurándonos de que el diálogo se crea y muestra solo si la actividad está activa
+        if (!isFinishing && !isDestroyed) {
+            AlertDialog.Builder(this)
+                .setTitle("📩 Revisar Correo")
+                .setMessage("Si tu correo está registrado con nosotros, recibirás un enlace para restablecer tu contraseña en unos momentos.")
+                .setPositiveButton("Aceptar") { dialog, _ ->
+                    dialog.dismiss()
+                    // Volvemos a la pantalla de Login
+                    val intent = Intent(this, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
+        }
     }
 }
