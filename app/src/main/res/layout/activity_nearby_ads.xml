@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="No se encontraron anuncios en un radio de 5 km."
+        android:text="No se encontraron anuncios en un radio de 5.5 km."
         android:textSize="16sp"
         android:visibility="gone" />
 

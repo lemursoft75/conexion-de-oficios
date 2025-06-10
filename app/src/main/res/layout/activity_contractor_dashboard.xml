@@ -35,11 +35,21 @@
         app:icon="@drawable/ic_list" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_edit_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Editar Mi Perfil"
+        app:icon="@drawable/ic_edit_profile"/>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:text="Cerrar Sesión" />
+
+
 
 </LinearLayout>

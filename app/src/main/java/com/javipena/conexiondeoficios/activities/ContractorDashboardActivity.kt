@@ -27,6 +27,13 @@ class ContractorDashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, MyAdsActivity::class.java))
         }
 
+        // En ContractorDashboardActivity.kt, dentro de onCreate
+
+        val btnEditProfile = findViewById<Button>(R.id.btn_edit_profile)
+        btnEditProfile.setOnClickListener {
+            startActivity(Intent(this, EditProfileActivity::class.java))
+        }
+
         // Botón para cerrar sesión y volver al Login
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()

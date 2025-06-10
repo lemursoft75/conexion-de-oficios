@@ -85,7 +85,7 @@ class NearbyAdsActivity : AppCompatActivity() {
 
     private fun findNearbyContractors(userLocation: Location) {
         val contractorsRef = FirebaseDatabase.getInstance().getReference("Users")
-        val radiusKm = 5.0
+        val radiusKm = 5.5
 
         contractorsRef.orderByChild("userType").equalTo("contractor")
             .addListenerForSingleValueEvent(object : ValueEventListener {

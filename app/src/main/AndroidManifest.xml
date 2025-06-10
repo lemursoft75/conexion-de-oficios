@@ -41,6 +41,7 @@
         <activity android:name=".activities.MyAdsActivity"/>
         <activity android:name=".activities.NearbyAdsActivity"/>
         <activity android:name=".activities.RecoverPasswordActivity" />
+        <activity android:name=".activities.EditProfileActivity"/>
 
 
     </application>

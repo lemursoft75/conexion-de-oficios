@@ -24,17 +24,22 @@ class CategoryAdapter(
         return CategoryViewHolder(view)
     }
 
+    // Dentro de tu CategoryAdapter.kt
+
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = categories[position]
 
-        // 📌 CAMBIO 2: Ahora ponemos el nombre de la categoría en el TextView
         holder.categoryName.text = category
 
-        // El botón ahora puede tener un texto genérico o también el de la categoría
-        // holder.viewButton.text = "Ver"
+        // Hacemos que toda la tarjeta sea clickeable
+        holder.itemView.setOnClickListener {
+            onClick(category)
+        }
 
-        // 📌 CAMBIO 3: Hacemos que toda la tarjeta sea clickeable
-        holder.itemView.setOnClickListener { onClick(category) }
+        // Y TAMBIÉN hacemos que el botón por sí solo sea clickeable
+        holder.viewButton.setOnClickListener {
+            onClick(category)
+        }
     }
 
     override fun getItemCount() = categories.size
