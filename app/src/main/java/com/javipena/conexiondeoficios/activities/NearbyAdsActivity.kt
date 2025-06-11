@@ -83,6 +83,7 @@ class NearbyAdsActivity : AppCompatActivity() {
         }
     }
 
+
     private fun findNearbyContractors(userLocation: Location) {
         val contractorsRef = FirebaseDatabase.getInstance().getReference("Users")
         val radiusKm = 5.5

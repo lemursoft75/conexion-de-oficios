@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_options"
+        android:title="Opciones"
+        android:icon="@drawable/ic_more_vert"
+        app:showAsAction="ifRoom|withText">
+
+        <menu>
+            <item
+                android:id="@+id/menu_edit_profile"
+                android:title="Editar Mi Perfil" />
+            <item
+                android:id="@+id/menu_logout"
+                android:title="Cerrar Sesión" />
+        </menu>
+    </item>
+
+</menu>
