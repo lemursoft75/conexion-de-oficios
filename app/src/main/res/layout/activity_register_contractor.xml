@@ -91,19 +91,49 @@
                 android:id="@+id/edit_rfc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="RFC (Opcional)"/>
+                android:hint="RFC (Opcional)"
+                android:layout_marginTop="16dp"/>
 
-            <EditText
-                android:id="@+id/edit_latitude"
+            <TextView
+                android:id="@+id/label_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ubicación (puedes detectarla o ingresarla manualmente):"
+                android:layout_marginTop="16dp"/>
+
+            <LinearLayout
+                android:id="@+id/location_fields_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Coordenada X"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
-            <EditText
-                android:id="@+id/edit_longitude"
+                <EditText
+                    android:id="@+id/edit_latitude"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Latitud"
+                    android:inputType="numberDecimal|numberSigned"/>
+
+                <EditText
+                    android:id="@+id/edit_longitude"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Longitud"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_detect_location"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Coordenada Y"/>
+                android:text="Detectar Ubicación Actual con GPS"
+                app:icon="@drawable/ic_my_location"
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
     </ScrollView>
 

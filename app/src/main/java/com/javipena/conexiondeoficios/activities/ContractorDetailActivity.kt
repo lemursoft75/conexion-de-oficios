@@ -31,6 +31,7 @@ class ContractorDetailActivity : AppCompatActivity() {
     private lateinit var textCompanyName: TextView
     private lateinit var textAdDescription: TextView
     private lateinit var imageAdDetail: ImageView
+    private lateinit var videoAdDetail: VideoView
     private lateinit var ratingBarAverage: RatingBar
     private lateinit var textReviewCount: TextView
     private lateinit var recyclerReviews: RecyclerView
@@ -62,11 +63,19 @@ class ContractorDetailActivity : AppCompatActivity() {
             return
         }
 
-        // --- Vinculación de todas las Vistas ---
+        setupViews()
+        setupRecyclerView(ad.contractorId)
+        populateUI(ad)
+        setupButtons(ad)
+        setupReviewButton(ad.contractorId)
+    }
+
+    private fun setupViews() {
         textContractorName = findViewById(R.id.text_contractor_name)
         textCompanyName = findViewById(R.id.text_company_name)
         textAdDescription = findViewById(R.id.text_ad_description)
         imageAdDetail = findViewById(R.id.image_ad_detail)
+        videoAdDetail = findViewById(R.id.video_ad_detail)
         textPhone = findViewById(R.id.text_phone)
         imageMap = findViewById(R.id.image_map)
         btnWhatsApp = findViewById(R.id.btn_whatsapp)
@@ -75,34 +84,44 @@ class ContractorDetailActivity : AppCompatActivity() {
         ratingBarAverage = findViewById(R.id.rating_bar_average)
         textReviewCount = findViewById(R.id.text_review_count)
         recyclerReviews = findViewById(R.id.recycler_reviews)
-
-        // --- Configuración Inicial de la UI ---
-        setupRecyclerView(ad.contractorId)
-        textAdDescription.text = ad.adText
-        textPhone.text = "Teléfono: ${ad.phone}"
-
-        if (!ad.mediaUrl.isNullOrEmpty()) {
-            imageAdDetail.visibility = View.VISIBLE
-            Glide.with(this).load(ad.mediaUrl).into(imageAdDetail)
-        } else {
-            imageAdDetail.visibility = View.GONE
-        }
-
-        if (ad.contractorId.isNotEmpty()) {
-            fetchContractorProfile(ad.contractorId)
-            fetchReviews(ad.contractorId)
-        } else {
-            textContractorName.text = "Contratista Anónimo"
-        }
-
-        setupButtons(ad)
-        setupReviewButton(ad.contractorId)
     }
 
     private fun setupRecyclerView(contractorId: String) {
         recyclerReviews.layoutManager = LinearLayoutManager(this)
         reviewAdapter = ReviewAdapter(reviewList, contractorId)
         recyclerReviews.adapter = reviewAdapter
+    }
+
+    private fun populateUI(ad: Ad) {
+        textAdDescription.text = ad.adText
+        textPhone.text = "Teléfono: ${ad.phone}"
+
+        // Lógica para mostrar imagen o video
+        val mediaUrl = ad.mediaUrl
+        if (!mediaUrl.isNullOrEmpty()) {
+            if (mediaUrl.contains("/video/")) {
+                imageAdDetail.visibility = View.GONE
+                videoAdDetail.visibility = View.VISIBLE
+                videoAdDetail.setVideoPath(mediaUrl)
+                videoAdDetail.setOnPreparedListener { it.isLooping = true }
+                videoAdDetail.start()
+            } else {
+                videoAdDetail.visibility = View.GONE
+                imageAdDetail.visibility = View.VISIBLE
+                Glide.with(this).load(mediaUrl).into(imageAdDetail)
+            }
+        } else {
+            imageAdDetail.visibility = View.GONE
+            videoAdDetail.visibility = View.GONE
+        }
+
+        // Cargar datos del perfil y las reseñas
+        if (ad.contractorId.isNotEmpty()) {
+            fetchContractorProfile(ad.contractorId)
+            fetchReviews(ad.contractorId)
+        } else {
+            textContractorName.text = "Contratista Anónimo"
+        }
     }
 
     private fun setupButtons(ad: Ad) {
@@ -138,10 +157,6 @@ class ContractorDetailActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Obtiene los datos del perfil del contratista y actualiza la UI.
-     * Usa un listener en tiempo real para que la calificación se actualice sola.
-     */
     private fun fetchContractorProfile(userId: String) {
         FirebaseDatabase.getInstance().getReference("Users").child(userId)
             .addValueEventListener(object : ValueEventListener {
@@ -160,9 +175,6 @@ class ContractorDetailActivity : AppCompatActivity() {
             })
     }
 
-    /**
-     * Obtiene la lista de reseñas y actualiza el RecyclerView en tiempo real.
-     */
     private fun fetchReviews(contractorId: String) {
         FirebaseDatabase.getInstance().getReference("Users").child(contractorId).child("reviews")
             .addValueEventListener(object : ValueEventListener {
@@ -183,9 +195,6 @@ class ContractorDetailActivity : AppCompatActivity() {
             })
     }
 
-    /**
-     * Muestra el diálogo para que un usuario registrado deje su calificación y comentario.
-     */
     private fun showLeaveReviewDialog(contractorId: String) {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
@@ -219,15 +228,12 @@ class ContractorDetailActivity : AppCompatActivity() {
                     .addOnSuccessListener {
                         Toast.makeText(this, "¡Gracias por tu opinión!", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
-                        // Aquí es donde una Cloud Function se encargaría de actualizar el promedio.
-                        // Por ahora, la nueva reseña aparecerá, pero el promedio no se actualizará hasta que el
-                        // usuario vuelva a entrar a la pantalla.
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "Error al publicar la reseña.", Toast.LENGTH_SHORT).show()
                     }
             } else {
-                Toast.makeText(this, "Por favor, selecciona una calificación (mínimo media estrella).", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, selecciona una calificación.", Toast.LENGTH_SHORT).show()
             }
         }
         builder.setNegativeButton("Cancelar", null)

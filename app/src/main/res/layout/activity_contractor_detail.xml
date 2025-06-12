@@ -22,7 +22,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Juan Pérez García" />
+            tools:text="Nombre del Contratista" />
 
         <TextView
             android:id="@+id/text_company_name"
@@ -35,7 +35,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_contractor_name"
-            tools:text="Plomería Express S.A. de C.V." />
+            tools:text="Nombre de la Compañía" />
 
         <RatingBar
             android:id="@+id/rating_bar_average"
@@ -59,19 +59,30 @@
             app:layout_constraintEnd_toEndOf="@id/rating_bar_average"
             app:layout_constraintStart_toStartOf="@id/rating_bar_average"
             app:layout_constraintTop_toBottomOf="@id/rating_bar_average"
-            tools:text="(12 opiniones)" />
+            tools:text="(0 opiniones)" />
 
-        <ImageView
-            android:id="@+id/image_ad_detail"
+        <FrameLayout
+            android:id="@+id/media_container_detail"
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:layout_marginTop="16dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_review_count"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toBottomOf="@id/text_review_count">
+
+            <ImageView
+                android:id="@+id/image_ad_detail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <VideoView
+                android:id="@+id/video_ad_detail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/text_ad_description"
@@ -81,8 +92,8 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/image_ad_detail"
-            tools:text="Especialista en fugas de agua y gas. Trabajos garantizados..." />
+            app:layout_constraintTop_toBottomOf="@id/media_container_detail"
+            tools:text="Descripción del anuncio..." />
 
         <TextView
             android:id="@+id/text_phone"
@@ -95,7 +106,7 @@
             app:drawableStartCompat="@drawable/ic_phone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_ad_description"
-            tools:text="Teléfono: 999 123 4567" />
+            tools:text="Teléfono: ..." />
 
         <ImageView
             android:id="@+id/image_map"
@@ -120,13 +131,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/image_map" />
+
         <Button
             android:id="@+id/btn_leave_review"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Escribir una Reseña"
             android:layout_marginTop="8dp"
+            android:text="Escribir una Reseña"
             app:icon="@drawable/ic_review"
             app:layout_constraintTop_toBottomOf="@id/btn_whatsapp"
             app:layout_constraintStart_toStartOf="parent"
