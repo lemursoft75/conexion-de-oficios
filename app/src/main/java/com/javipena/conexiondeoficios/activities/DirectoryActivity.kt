@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.recyclerview.widget.GridLayoutManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.adapters.CategoryAdapter
+import com.javipena.conexiondeoficios.adapters.CategoryItem
 
 class DirectoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,16 +29,31 @@ class DirectoryActivity : AppCompatActivity() {
 
         // Lógica para la lista de categorías por especialidad
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_categories)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = GridLayoutManager(this, 3) // 3 columnas
         val categories = listOf(
-            "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor",
-            "Mecánico", "Técnico en refrigeración", "Técnico en computadoras",
-            "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario",
-            "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro"
+            CategoryItem("Albañil", R.drawable.ic_construction),
+            CategoryItem("Electricista", R.drawable.ic_bolt),
+            CategoryItem("Plomero", R.drawable.ic_plumbing),
+            CategoryItem("Carpintero", R.drawable.ic_carpenter),
+            CategoryItem("Pintor", R.drawable.ic_painter),
+            CategoryItem("Mecánico", R.drawable.ic_mechanic),
+            CategoryItem("Técnico en refrigeración", R.drawable.ic_ac_unit),
+            CategoryItem("Técnico en computadoras", R.drawable.ic_computer),
+            CategoryItem("Herrero", R.drawable.ic_welding),
+            CategoryItem("Limpieza de hogar", R.drawable.ic_cleaning),
+            CategoryItem("Jardinero", R.drawable.ic_gardening),
+            CategoryItem("Agente inmobiliario", R.drawable.ic_real_estate),
+            CategoryItem("Médico", R.drawable.ic_medical),
+            CategoryItem("Asesoría escolar", R.drawable.ic_school),
+            CategoryItem("Músico", R.drawable.ic_music),
+            CategoryItem("Animación para eventos", R.drawable.ic_celebration),
+            CategoryItem("Otro", R.drawable.ic_more)
         )
-        val categoryAdapter = CategoryAdapter(categories) { category ->
+
+        // El adaptador ahora recibe esta nueva lista de objetos
+        val categoryAdapter = CategoryAdapter(categories) { categoryItem ->
             val intent = Intent(this, ContractorListActivity::class.java)
-            intent.putExtra("CATEGORY_NAME", category)
+            intent.putExtra("CATEGORY_NAME", categoryItem.name) // Pasamos solo el nombre a la siguiente actividad
             startActivity(intent)
         }
         recyclerView.adapter = categoryAdapter
