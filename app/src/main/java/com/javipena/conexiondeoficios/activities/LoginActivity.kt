@@ -21,13 +21,15 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Vinculación de todos los elementos de la UI
+        // --- Vinculación de todos los elementos de la UI ---
         val username = findViewById<EditText>(R.id.edit_username)
         val password = findViewById<EditText>(R.id.edit_password)
         val btnLogin = findViewById<Button>(R.id.btn_login)
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnGuestLogin = findViewById<Button>(R.id.btn_guest_login)
-        val textForgotPassword = findViewById<Button>(R.id.btn_recover_password)
+
+        // 📌 CAMBIO: Ahora buscamos el TextView en lugar de un botón
+        val textForgotPassword = findViewById<TextView>(R.id.text_forgot_password)
 
 
         // Listener para el botón de Iniciar Sesión

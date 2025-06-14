@@ -2,110 +2,138 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/white">
+    android:padding="24dp"
+    tools:context=".activities.LoginActivity">
 
-    <!-- Título -->
+    <ImageView
+        android:id="@+id/logo_login"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintBottom_toTopOf="@id/input_layout_username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
+
     <TextView
-        android:id="@+id/text_title"
+        android:id="@+id/text_app_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Iniciar Sesión"
-        android:textSize="22sp"
+        android:text="Conexión de Oficios"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginBottom="20dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/logo_login"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Campo de Usuario -->
-    <EditText
-        android:id="@+id/edit_username"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/text_developer_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="By Xibalbá Tech"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/text_app_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout_username"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Correo electrónico"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/text_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
-    <!-- Campo de Contraseña -->
-    <EditText
-        android:id="@+id/edit_password"
-        android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout_password"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:hint="Contraseña"
-        android:inputType="textPassword"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/edit_username"
+        app:passwordToggleEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/input_layout_username"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Botón de Iniciar Sesión -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/text_forgot_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿Olvidaste tu contraseña?"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:textColor="?attr/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_layout_password"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Iniciar Sesión"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/blue"
-        app:cornerRadius="12dp"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/edit_password"
+        android:paddingVertical="12dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/text_forgot_password"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Botón de Invitado -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_guest_login"
-        android:layout_width="match_parent"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Entrar como invitado"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/gray"
-        app:cornerRadius="12dp"
-        android:textColor="@color/white"
-        android:layout_marginTop="16dp"
+        android:paddingVertical="12dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/btn_login"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Botón de Registro -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_register"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registrarse"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/green"
-        app:cornerRadius="12dp"
-        android:textColor="@color/white"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btn_guest_login"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Botón de Recuperar Contraseña -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_recover_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Recuperar contraseña"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/red"
-        app:cornerRadius="12dp"
-        android:textColor="@color/white"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btn_register"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿No tienes una cuenta?" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_register"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Regístrate aquí" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
