@@ -18,5 +18,7 @@ data class Ad(
     val latitude: String = "",
     val longitude: String = "",
     val specialty: String = "",
-    val mediaUrl: String? = null // Puede ser nulo si el usuario no sube una foto
+    val mediaUrl: String? = null
 ) : Parcelable
+
+

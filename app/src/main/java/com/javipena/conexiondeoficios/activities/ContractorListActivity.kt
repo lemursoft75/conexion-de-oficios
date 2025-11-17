@@ -57,13 +57,12 @@ class ContractorListActivity : AppCompatActivity() {
         recyclerView.visibility = View.GONE
 
         val databaseRef = FirebaseDatabase.getInstance().getReference("Ads")
-
-        // Esta es la consulta clave para encontrar los anuncios por especialidad
         val query = databaseRef.orderByChild("specialty").equalTo(category)
 
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
+        query.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 adsList.clear()
+
                 if (snapshot.exists()) {
                     for (adSnapshot in snapshot.children) {
                         val ad = adSnapshot.getValue(Ad::class.java)
@@ -71,12 +70,16 @@ class ContractorListActivity : AppCompatActivity() {
                             adsList.add(ad)
                         }
                     }
+
                     adsAdapter.notifyDataSetChanged()
                     recyclerView.visibility = View.VISIBLE
+                    noResultsText.visibility = View.GONE
+
                 } else {
-                    // Si no se encontraron resultados, mostrar el mensaje
                     noResultsText.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
                 }
+
                 progressBar.visibility = View.GONE
             }
 
@@ -86,4 +89,5 @@ class ContractorListActivity : AppCompatActivity() {
             }
         })
     }
+
 }

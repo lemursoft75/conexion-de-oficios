@@ -36,7 +36,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var dbRef: FirebaseDatabase
 
-    private val specialtiesList = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
+    private val specialtiesList = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Cerrajero", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

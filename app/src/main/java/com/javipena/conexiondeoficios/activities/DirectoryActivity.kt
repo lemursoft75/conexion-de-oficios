@@ -35,7 +35,7 @@ class DirectoryActivity : AppCompatActivity() {
             CategoryItem("Electricista", R.drawable.ic_bolt),
             CategoryItem("Plomero", R.drawable.ic_plumbing),
             CategoryItem("Carpintero", R.drawable.ic_carpenter),
-            CategoryItem("Pintor", R.drawable.ic_painter),
+            CategoryItem("Cerrajero", R.drawable.ic_cerrajeria),
             CategoryItem("Mecánico", R.drawable.ic_mechanic),
             CategoryItem("Técnico en refrigeración", R.drawable.ic_ac_unit),
             CategoryItem("Técnico en computadoras", R.drawable.ic_computer),
@@ -44,7 +44,7 @@ class DirectoryActivity : AppCompatActivity() {
             CategoryItem("Jardinero", R.drawable.ic_gardening),
             CategoryItem("Agente inmobiliario", R.drawable.ic_real_estate),
             CategoryItem("Médico", R.drawable.ic_medical),
-            CategoryItem("Asesoría escolar", R.drawable.ic_school),
+            CategoryItem("Pintor", R.drawable.ic_painter),
             CategoryItem("Músico", R.drawable.ic_music),
             CategoryItem("Animación para eventos", R.drawable.ic_celebration),
             CategoryItem("Otro", R.drawable.ic_more)
@@ -69,6 +69,14 @@ class DirectoryActivity : AppCompatActivity() {
         textDisclaimer.setOnClickListener {
             showDisclaimerDialog()
         }
+
+        val btnChat = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_chatbot)
+
+        btnChat.setOnClickListener {
+            val intent = Intent(this, ChatActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     /**

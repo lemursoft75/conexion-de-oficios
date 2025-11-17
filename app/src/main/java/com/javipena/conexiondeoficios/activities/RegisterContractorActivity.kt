@@ -75,7 +75,7 @@ class RegisterContractorActivity : AppCompatActivity() {
     }
 
     private fun setupSpecialtySpinner() {
-        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Pintor", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
+        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Cerrajero", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, specialties)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecialty.adapter = adapter

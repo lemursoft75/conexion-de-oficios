@@ -14,10 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.javipena.conexiondeoficios.Ad
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.adapters.ReviewAdapter
@@ -26,7 +23,7 @@ import com.javipena.conexiondeoficios.models.Review
 
 class ContractorDetailActivity : AppCompatActivity() {
 
-    // Vistas de la UI
+    // Vistas
     private lateinit var textContractorName: TextView
     private lateinit var textCompanyName: TextView
     private lateinit var textAdDescription: TextView
@@ -42,8 +39,13 @@ class ContractorDetailActivity : AppCompatActivity() {
     private lateinit var btnLeaveReview: Button
     private lateinit var btnBack: Button
 
-    // Lista de datos
+    // Lista de reseñas
     private val reviewList = mutableListOf<Pair<String, Review>>()
+
+    // Datos cargados del contratista
+    private var contractorPhone: String = ""
+    private var contractorLat: String = ""
+    private var contractorLon: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +68,7 @@ class ContractorDetailActivity : AppCompatActivity() {
         setupViews()
         setupRecyclerView(ad.contractorId)
         populateUI(ad)
-        setupButtons(ad)
+        setupButtons()
         setupReviewButton(ad.contractorId)
     }
 
@@ -94,9 +96,8 @@ class ContractorDetailActivity : AppCompatActivity() {
 
     private fun populateUI(ad: Ad) {
         textAdDescription.text = ad.adText
-        textPhone.text = "Teléfono: ${ad.phone}"
 
-        // Lógica para mostrar imagen o video
+        // Mostrar imagen o video
         val mediaUrl = ad.mediaUrl
         if (!mediaUrl.isNullOrEmpty()) {
             if (mediaUrl.contains("/video/")) {
@@ -115,7 +116,6 @@ class ContractorDetailActivity : AppCompatActivity() {
             videoAdDetail.visibility = View.GONE
         }
 
-        // Cargar datos del perfil y las reseñas
         if (ad.contractorId.isNotEmpty()) {
             fetchContractorProfile(ad.contractorId)
             fetchReviews(ad.contractorId)
@@ -124,26 +124,40 @@ class ContractorDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupButtons(ad: Ad) {
+    private fun setupButtons() {
         btnWhatsApp.setOnClickListener {
-            val phoneNumber = ad.phone.replace(Regex("[^0-9]"), "")
+            if (contractorPhone.isEmpty()) {
+                Toast.makeText(this, "El contratista no tiene teléfono registrado.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val phoneNumber = contractorPhone.replace(Regex("[^0-9]"), "")
             val url = "https://wa.me/$phoneNumber"
+
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
             } catch (e: Exception) {
                 Toast.makeText(this, "No se pudo abrir WhatsApp.", Toast.LENGTH_SHORT).show()
             }
         }
+
         imageMap.setOnClickListener {
-            val gmmIntentUri = Uri.parse("geo:${ad.latitude},${ad.longitude}?q=${ad.latitude},${ad.longitude}(${textContractorName.text})")
-            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-            mapIntent.setPackage("com.google.android.apps.maps")
+            if (contractorLat.isEmpty() || contractorLon.isEmpty()) {
+                Toast.makeText(this, "Ubicación no disponible.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val uri = Uri.parse("geo:$contractorLat,$contractorLon?q=$contractorLat,$contractorLon(${textContractorName.text})")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.setPackage("com.google.android.apps.maps")
+
             try {
-                startActivity(mapIntent)
+                startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Toast.makeText(this, "No se encontró la aplicación de Google Maps.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Google Maps no está instalado.", Toast.LENGTH_LONG).show()
             }
         }
+
         btnBack.setOnClickListener { finish() }
     }
 
@@ -162,13 +176,21 @@ class ContractorDetailActivity : AppCompatActivity() {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val contractor = snapshot.getValue(Contractor::class.java)
+
                     if (contractor != null) {
                         textContractorName.text = "${contractor.name} ${contractor.lastname}"
                         textCompanyName.text = contractor.companyName
+                        textPhone.text = "Teléfono: ${contractor.phone}"
                         ratingBarAverage.rating = contractor.averageRating.toFloat()
                         textReviewCount.text = "(${contractor.reviewCount} opiniones)"
+
+                        // Guardar para WhatsApp y Maps
+                        contractorPhone = contractor.phone
+                        contractorLat = contractor.latitude
+                        contractorLon = contractor.longitude
                     }
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("DetailActivity", "Error al cargar perfil: ${error.message}")
                 }
@@ -180,6 +202,7 @@ class ContractorDetailActivity : AppCompatActivity() {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     reviewList.clear()
+
                     for (reviewSnapshot in snapshot.children) {
                         val review = reviewSnapshot.getValue(Review::class.java)
                         val reviewId = reviewSnapshot.key
@@ -187,8 +210,10 @@ class ContractorDetailActivity : AppCompatActivity() {
                             reviewList.add(Pair(reviewId, review))
                         }
                     }
+
                     reviewAdapter.notifyDataSetChanged()
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("DetailActivity", "Error al cargar reseñas: ${error.message}")
                 }
@@ -197,8 +222,7 @@ class ContractorDetailActivity : AppCompatActivity() {
 
     private fun showLeaveReviewDialog(contractorId: String) {
         val builder = AlertDialog.Builder(this)
-        val inflater = layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_leave_review, null)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_leave_review, null)
         builder.setView(dialogView)
 
         val ratingBar = dialogView.findViewById<RatingBar>(R.id.rating_bar_review)
@@ -224,7 +248,8 @@ class ContractorDetailActivity : AppCompatActivity() {
                 FirebaseDatabase.getInstance().getReference("Users")
                     .child(contractorId)
                     .child("reviews")
-                    .push().setValue(reviewData)
+                    .push()
+                    .setValue(reviewData)
                     .addOnSuccessListener {
                         Toast.makeText(this, "¡Gracias por tu opinión!", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
@@ -236,6 +261,7 @@ class ContractorDetailActivity : AppCompatActivity() {
                 Toast.makeText(this, "Por favor, selecciona una calificación.", Toast.LENGTH_SHORT).show()
             }
         }
+
         builder.setNegativeButton("Cancelar", null)
         builder.create().show()
     }

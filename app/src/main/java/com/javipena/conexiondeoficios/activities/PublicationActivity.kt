@@ -211,6 +211,7 @@ class PublicationActivity : AppCompatActivity() {
         mediaUrl: String?
     ) {
         val databaseRef = FirebaseDatabase.getInstance().getReference("Ads")
+
         val adData = Ad(
             contractorId = userId,
             adText = adText,
@@ -227,10 +228,12 @@ class PublicationActivity : AppCompatActivity() {
                 returnToMenu()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "❌ Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
                 setLoading(false)
             }
     }
+
+
 
     private fun setLoading(isLoading: Boolean) {
         progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE

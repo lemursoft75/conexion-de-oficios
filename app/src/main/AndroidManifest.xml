@@ -48,6 +48,8 @@
         <activity android:name=".activities.RecoverPasswordActivity" />
         <activity android:name=".activities.EditProfileActivity"/>
         <activity android:name=".activities.EditClientProfileActivity"/>
+        <activity android:name=".activities.ChatActivity"/>
+
 
 
     </application>
