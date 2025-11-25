@@ -1,6 +1,5 @@
 package com.javipena.conexiondeoficios.models
 
-// No olvides hacerla Parcelable si necesitas pasarla entre actividades
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -16,8 +15,15 @@ data class Contractor(
     val latitude: String = "",
     val longitude: String = "",
 
-    // 📌 CAMPOS AÑADIDOS PARA EL SISTEMA DE RESEÑAS
+    // 📌 Sistema de reseñas
     val averageRating: Double = 0.0,
-    val reviewCount: Int = 0
+    val reviewCount: Int = 0,
+
+    // 📌 Nuevos campos de atención y emergencias
+    val attendsEmergencies: Boolean = false,
+    val attentionDays: String = "",
+    val attentionFrom: String = "",
+    val attentionTo: String = ""
 
 ) : Parcelable
+

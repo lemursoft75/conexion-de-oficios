@@ -49,6 +49,7 @@
         <activity android:name=".activities.EditProfileActivity"/>
         <activity android:name=".activities.EditClientProfileActivity"/>
         <activity android:name=".activities.ChatActivity"/>
+        <activity android:name=".activities.EditAdActivity"/>
 
 
 

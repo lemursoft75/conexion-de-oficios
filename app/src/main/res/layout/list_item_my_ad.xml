@@ -13,18 +13,36 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Texto del anuncio -->
         <TextView
             android:id="@+id/text_ad_content_item"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:textSize="16sp"
+            android:maxLines="1000"
+            android:ellipsize="end"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btn_delete_ad"
+            app:layout_constraintEnd_toStartOf="@+id/btn_edit_ad"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Este es el texto de mi anuncio de plomería y servicios generales 24 horas." />
+            tools:text="Texto de ejemplo largo para mostrar cómo se verá un anuncio dentro del RecyclerView." />
 
+
+        <!-- Botón Editar -->
+        <ImageButton
+            android:id="@+id/btn_edit_ad"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Editar anuncio"
+            android:src="@drawable/edit_ad"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_delete_ad"
+            android:layout_marginEnd="12dp"
+            app:tint="@color/blue" />
+
+        <!-- Botón Eliminar -->
         <ImageButton
             android:id="@+id/btn_delete_ad"
             android:layout_width="wrap_content"
@@ -38,4 +56,5 @@
             app:tint="@android:color/holo_red_dark" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </com.google.android.material.card.MaterialCardView>

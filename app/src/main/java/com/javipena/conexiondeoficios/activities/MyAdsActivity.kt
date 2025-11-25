@@ -19,6 +19,8 @@ import com.google.firebase.storage.FirebaseStorage
 import com.javipena.conexiondeoficios.Ad
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.adapters.MyAdsAdapter
+import android.content.Intent
+
 
 class MyAdsActivity : AppCompatActivity() {
 
@@ -49,9 +51,11 @@ class MyAdsActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         // El adapter recibirá una función para manejar el clic en el botón de borrar.
-        myAdsAdapter = MyAdsAdapter(adsList) { adId, ad, position ->
-            showDeleteConfirmationDialog(adId, ad, position)
-        }
+        myAdsAdapter = MyAdsAdapter(
+            adsList,
+            { adId, ad, position -> showDeleteConfirmationDialog(adId, ad, position) },
+            { adId, ad -> openEditAdActivity(adId, ad) }
+        )
         recyclerView.adapter = myAdsAdapter
     }
 
@@ -132,5 +136,12 @@ class MyAdsActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Toast.makeText(this, "Error al eliminar el anuncio.", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun openEditAdActivity(adId: String, ad: Ad) {
+        val intent = Intent(this, EditAdActivity::class.java)
+        intent.putExtra("AD_ID", adId)
+        intent.putExtra("AD_OBJECT", ad)
+        startActivity(intent)
     }
 }

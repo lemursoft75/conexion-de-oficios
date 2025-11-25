@@ -9,11 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,7 +20,7 @@ import com.javipena.conexiondeoficios.R
 
 class RegisterContractorActivity : AppCompatActivity() {
 
-    // --- Vistas de la UI ---
+    // --- Vistas ---
     private lateinit var editName: EditText
     private lateinit var editLastname: EditText
     private lateinit var editPhone: EditText
@@ -37,9 +33,14 @@ class RegisterContractorActivity : AppCompatActivity() {
     private lateinit var editLatitude: EditText
     private lateinit var editLongitude: EditText
     private lateinit var btnRegister: Button
-    private lateinit var btnDetectLocation: Button // Botón nuevo
+    private lateinit var btnDetectLocation: Button
 
-    // --- Firebase ---
+    // ✔ NUEVOS CAMPOS
+    private lateinit var switchEmergencies: Switch
+    private lateinit var editDays: EditText
+    private lateinit var editHoursFrom: EditText
+    private lateinit var editHoursTo: EditText
+
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,13 +49,8 @@ class RegisterContractorActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Vinculación de todas las vistas del layout
         setupViews()
-
-        // Configuración del Spinner de especialidades
         setupSpecialtySpinner()
-
-        // Configuración de los listeners para los botones
         setupClickListeners()
     }
 
@@ -72,58 +68,77 @@ class RegisterContractorActivity : AppCompatActivity() {
         editLongitude = findViewById(R.id.edit_longitude)
         btnRegister = findViewById(R.id.btn_register)
         btnDetectLocation = findViewById(R.id.btn_detect_location)
+
+        // ✔ NUEVOS
+        switchEmergencies = findViewById(R.id.switch_emergency)
+        editDays = findViewById(R.id.edit_days)
+        editHoursFrom = findViewById(R.id.edit_hours_from)
+        editHoursTo = findViewById(R.id.edit_hours_to)
     }
 
     private fun setupSpecialtySpinner() {
-        val specialties = listOf("Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero", "Cerrajero", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras", "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico", "Asesoría escolar", "Músico", "Animación para eventos", "Otro")
+        val specialties = listOf(
+            "Selecciona una especialidad", "Albañil", "Electricista", "Plomero", "Carpintero",
+            "Cerrajero", "Mecánico", "Técnico en refrigeración", "Técnico en computadoras",
+            "Herrero", "Limpieza de hogar", "Jardinero", "Agente inmobiliario", "Médico",
+            "Asesoría escolar", "Músico", "Animación para eventos", "Otro"
+        )
+
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, specialties)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecialty.adapter = adapter
     }
 
     private fun setupClickListeners() {
-        btnRegister.setOnClickListener {
-            registerContractor()
-        }
-        btnDetectLocation.setOnClickListener {
-            checkLocationPermission()
-        }
+        btnRegister.setOnClickListener { registerContractor() }
+        btnDetectLocation.setOnClickListener { checkLocationPermission() }
     }
 
     private fun checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             getCurrentLocation()
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             getCurrentLocation()
         } else {
-            Toast.makeText(this, "El permiso de ubicación es necesario para detectar tu posición.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Necesitas permitir la ubicación.", Toast.LENGTH_LONG).show()
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
-        Toast.makeText(this, "Detectando ubicación...", Toast.LENGTH_SHORT).show()
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
+            .addOnSuccessListener { location ->
                 if (location != null) {
-                    editLatitude.setText(String.format("%.6f", location.latitude))
-                    editLongitude.setText(String.format("%.6f", location.longitude))
+                    editLatitude.setText("%.6f".format(location.latitude))
+                    editLongitude.setText("%.6f".format(location.longitude))
                     Toast.makeText(this, "Ubicación detectada.", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, "No se pudo obtener la ubicación. Asegúrate de tener el GPS activado.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "No se pudo obtener la ubicación.", Toast.LENGTH_LONG).show()
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al obtener la ubicación.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -140,22 +155,28 @@ class RegisterContractorActivity : AppCompatActivity() {
         val latitudeStr = editLatitude.text.toString().trim()
         val longitudeStr = editLongitude.text.toString().trim()
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || specialty == "Selecciona una especialidad" || latitudeStr.isEmpty() || longitudeStr.isEmpty()) {
-            Toast.makeText(this, "❌ Por favor, completa todos los campos obligatorios.", Toast.LENGTH_SHORT).show()
+        // ✔ NUEVOS CAMPOS
+        val attendsEmergencies = switchEmergencies.isChecked
+        val days = editDays.text.toString().trim()
+        val hourFrom = editHoursFrom.text.toString().trim()
+        val hourTo = editHoursTo.text.toString().trim()
+
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || specialty == "Selecciona una especialidad") {
+            Toast.makeText(this, "Completa todos los campos obligatorios.", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (password != confirmPassword) {
-            Toast.makeText(this, "⚠ Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Las contraseñas no coinciden.", Toast.LENGTH_SHORT).show()
             return
         }
 
         auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { authTask ->
-                if (authTask.isSuccessful) {
-                    Log.d("Register", "✅ Usuario creado en Firebase Authentication")
+            .addOnCompleteListener { taskAuth ->
+                if (taskAuth.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
 
+                    // Guardar en Firebase
                     val contractorData = mapOf(
                         "name" to name,
                         "lastname" to lastname,
@@ -168,33 +189,37 @@ class RegisterContractorActivity : AppCompatActivity() {
                         "longitude" to longitudeStr,
                         "userType" to "contractor",
                         "averageRating" to 0.0,
-                        "reviewCount" to 0
+                        "reviewCount" to 0,
+
+                        // ✔ NUEVOS
+                        "attendsEmergencies" to attendsEmergencies,
+                        "attentionDays" to days,
+                        "attentionFrom" to hourFrom,
+                        "attentionTo" to hourTo
                     )
 
-                    FirebaseDatabase.getInstance().getReference("Users").child(userId)
+                    FirebaseDatabase.getInstance().getReference("Users")
+                        .child(userId)
                         .setValue(contractorData)
-                        .addOnCompleteListener { dbTask ->
-                            if (dbTask.isSuccessful) {
-                                Log.d("Register", "✅ Datos guardados en Firebase Database")
-                                runOnUiThread { showSuccessDialog() }
-                            } else {
-                                Log.e("Register", "❌ Error al guardar datos: ${dbTask.exception?.message}")
-                                Toast.makeText(this, "❌ Error al guardar datos.", Toast.LENGTH_LONG).show()
-                            }
+                        .addOnSuccessListener {
+                            showSuccessDialog()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Error al guardar.", Toast.LENGTH_LONG).show()
                         }
                 } else {
-                    Log.e("Register", "❌ Error en autenticación: ${authTask.exception?.message}")
-                    Toast.makeText(this, "❌ Error en la autenticación: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Error: ${taskAuth.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 
     private fun showSuccessDialog() {
         val dialog = AlertDialog.Builder(this)
-            .setTitle("✅ Registro Completo")
-            .setMessage("Tu cuenta ha sido creada exitosamente. Serás redirigido en unos segundos...")
+            .setTitle("Registro Completo")
+            .setMessage("Tu cuenta ha sido creada exitosamente.")
             .setCancelable(false)
             .create()
+
         dialog.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -207,7 +232,6 @@ class RegisterContractorActivity : AppCompatActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish()
     }
 
     companion object {

@@ -7,7 +7,6 @@
     android:padding="16dp"
     android:background="@color/white">
 
-    <!-- Título -->
     <TextView
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
@@ -21,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Campos del formulario -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -34,110 +32,101 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <EditText
-                android:id="@+id/edit_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre"/>
+            <!-- Tus campos normales -->
+            <EditText android:id="@+id/edit_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre"/>
+            <EditText android:id="@+id/edit_lastname" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Apellidos" android:layout_marginTop="16dp"/>
+            <EditText android:id="@+id/edit_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Teléfono" android:layout_marginTop="16dp"/>
+            <EditText android:id="@+id/edit_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Correo"/>
+            <EditText android:id="@+id/edit_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contraseña" android:inputType="textPassword"/>
+            <EditText android:id="@+id/edit_confirm_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Confirmar contraseña" android:inputType="textPassword"/>
+            <EditText android:id="@+id/edit_company" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre de empresa"/>
 
-            <EditText
-                android:id="@+id/edit_lastname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Apellidos"
-                android:layout_marginTop="16dp"/>
+            <Spinner android:id="@+id/spinner_specialty" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
-            <EditText
-                android:id="@+id/edit_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Teléfono con clave (52 Mex)"
-                android:layout_marginTop="16dp"/>
+            <EditText android:id="@+id/edit_rfc" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="RFC (opcional)" android:layout_marginTop="16dp"/>
 
-            <EditText
-                android:id="@+id/edit_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="E-mail (real para recuperar password"/>
-
-            <EditText
-                android:id="@+id/edit_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Contraseña"
-                android:inputType="textPassword"/>
-
-            <EditText
-                android:id="@+id/edit_confirm_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Confirmar contraseña"
-                android:inputType="textPassword"/>
-
-            <EditText
-                android:id="@+id/edit_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre de la empresa"/>
-
-            <!-- Especialidad con valores precargados -->
-            <Spinner
-                android:id="@+id/spinner_specialty"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"/>
-
-            <EditText
-                android:id="@+id/edit_rfc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="RFC (Opcional)"
-                android:layout_marginTop="16dp"/>
-
+            <!-- Ubicación -->
             <TextView
-                android:id="@+id/label_location"
+                android:text="Ubicación (manual o GPS):"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ubicación (puedes detectarla o ingresarla manualmente):"
                 android:layout_marginTop="16dp"/>
 
             <LinearLayout
-                android:id="@+id/location_fields_container"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginTop="8dp">
 
                 <EditText
                     android:id="@+id/edit_latitude"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Latitud"
-                    android:inputType="numberDecimal|numberSigned"/>
+                    android:layout_height="wrap_content"
+                    android:hint="Latitud"/>
 
                 <EditText
                     android:id="@+id/edit_longitude"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:hint="Longitud"
-                    android:inputType="numberDecimal|numberSigned"
                     android:layout_marginStart="8dp"/>
             </LinearLayout>
 
             <Button
                 android:id="@+id/btn_detect_location"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Detectar Ubicación Actual con GPS"
-                app:icon="@drawable/ic_my_location"
-                android:layout_marginTop="8dp"/>
+                android:text="Detectar ubicación GPS"/>
+
+            <!-- NUEVO: Emergencias -->
+            <TextView
+                android:text="¿Atiende emergencias?"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"/>
+
+            <Switch
+                android:id="@+id/switch_emergency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sí, disponible para emergencias 24/7"/>
+
+            <!-- NUEVO: Días de atención -->
+            <EditText
+                android:id="@+id/edit_days"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Días de atención (Ej: Lunes a Sábado)"
+                android:layout_marginTop="20dp"/>
+
+            <!-- NUEVO: Horarios -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/edit_hours_from"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="De (Ej: 8:00 AM)"/>
+
+                <EditText
+                    android:id="@+id/edit_hours_to"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="A (Ej: 6:00 PM)"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
-    <!-- Botón de Registro -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_register"
         android:layout_width="match_parent"
@@ -146,8 +135,9 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:backgroundTint="@color/blue"
-        app:cornerRadius="12dp"
         android:textColor="@color/white"
+        app:cornerRadius="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

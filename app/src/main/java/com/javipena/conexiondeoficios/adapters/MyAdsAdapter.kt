@@ -11,12 +11,14 @@ import com.javipena.conexiondeoficios.R
 
 class MyAdsAdapter(
     private val adsList: List<Pair<String, Ad>>,
-    private val onDeleteClick: (String, Ad, Int) -> Unit
+    private val onDeleteClick: (String, Ad, Int) -> Unit,
+    private val onEditClick: (String, Ad) -> Unit
 ) : RecyclerView.Adapter<MyAdsAdapter.MyAdViewHolder>() {
 
-    class MyAdViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val adTextView: TextView = itemView.findViewById(R.id.text_ad_content_item)
-        val deleteButton: ImageButton = itemView.findViewById(R.id.btn_delete_ad)
+    class MyAdViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textContent: TextView = view.findViewById(R.id.text_ad_content_item)
+        val btnDelete: ImageButton = view.findViewById(R.id.btn_delete_ad)
+        val btnEdit: ImageButton = view.findViewById(R.id.btn_edit_ad)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyAdViewHolder {
@@ -27,12 +29,17 @@ class MyAdsAdapter(
 
     override fun onBindViewHolder(holder: MyAdViewHolder, position: Int) {
         val (adId, ad) = adsList[position]
-        holder.adTextView.text = ad.adText
 
-        holder.deleteButton.setOnClickListener {
+        holder.textContent.text = ad.adText
+
+        holder.btnDelete.setOnClickListener {
             onDeleteClick(adId, ad, position)
+        }
+
+        holder.btnEdit.setOnClickListener {
+            onEditClick(adId, ad)
         }
     }
 
-    override fun getItemCount() = adsList.size
+    override fun getItemCount(): Int = adsList.size
 }
