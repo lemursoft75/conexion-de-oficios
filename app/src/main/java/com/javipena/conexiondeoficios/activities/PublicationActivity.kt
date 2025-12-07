@@ -174,29 +174,38 @@ class PublicationActivity : AppCompatActivity() {
         specialty: String
     ) {
         mediaUri?.let { uri ->
+            // Determina el tipo de recurso (imagen o video)
             val resourceType = if (contentResolver.getType(uri)?.startsWith("video") == true) "video" else "image"
+
+            // 🚨 CORRECCIÓN CLAVE: Se añade el "upload_preset" requerido por Cloudinary
+            // para subidas sin firmar (unsigned uploads).
             MediaManager.get().upload(uri)
+                .option("upload_preset", "unsigned_ads") // <--- ¡Esta línea es la corrección!
                 .option("public_id", adId)
                 .option("folder", "ads_media")
                 .option("resource_type", resourceType)
                 .option("chunk_size", 6_000_000) // Para archivos grandes
                 .callback(object : UploadCallback {
                     override fun onSuccess(requestId: String, resultData: Map<*, *>?) {
+                        // Obtiene la URL segura del resultado de Cloudinary
                         val secureUrl = resultData?.get("secure_url").toString()
+                        // Guarda los datos del anuncio con la URL del medio
                         saveAdData(adId, userId, adText, phone, latitude, longitude, specialty, secureUrl)
                     }
 
                     override fun onError(requestId: String, error: ErrorInfo) {
+                        // Muestra el error de Cloudinary y detiene la carga
                         Log.e("PublicationActivity", "Error al subir a Cloudinary: ${error.description}")
                         Toast.makeText(baseContext, "Error al subir el archivo.", Toast.LENGTH_SHORT).show()
                         setLoading(false)
                     }
 
+                    // Métodos obligatorios de la interfaz UploadCallback (no necesitan lógica aquí)
                     override fun onStart(requestId: String?) {}
                     override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
                     override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
                 })
-                .dispatch()
+                .dispatch() // Inicia el proceso de subida
         }
     }
 
