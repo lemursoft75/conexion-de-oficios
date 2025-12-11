@@ -21,6 +21,8 @@ class AdsAdapter(private val adsList: List<Ad>) :
         val phoneTextView: TextView = itemView.findViewById(R.id.text_ad_phone)
         val specialtyTextView: TextView = itemView.findViewById(R.id.text_ad_specialty)
         val adImageView: ImageView = itemView.findViewById(R.id.image_ad_item)
+        // 🚨 NUEVO: Referencia para el tag de emergencias
+        val emergencyTagTextView: TextView = itemView.findViewById(R.id.text_emergency_tag)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AdViewHolder {
@@ -41,11 +43,16 @@ class AdsAdapter(private val adsList: List<Ad>) :
             FirebaseDatabase.getInstance().getReference("Users").child(ad.contractorId)
 
         userRef.get().addOnSuccessListener { snapshot ->
-            val phone = snapshot.child("phone").value?.toString() ?: "Sin teléfono"
 
-            // Usar directamente la especialidad del anuncio si ya existe
-            val specialtyFromAd = ad.specialty
+            // Datos del Usuario
+            val phone = snapshot.child("phone").value?.toString() ?: "Sin teléfono"
             val specialtyFromUser = snapshot.child("specialty").value?.toString()
+
+            // 🚨 NUEVO: Lectura del estado de emergencias (true/false)
+            val attendsEmergencies = snapshot.child("attendsEmergencies").getValue(Boolean::class.java) ?: false
+
+            // Datos del Anuncio
+            val specialtyFromAd = ad.specialty
 
             val specialtyToShow = when {
                 !specialtyFromAd.isNullOrEmpty() -> specialtyFromAd
@@ -53,10 +60,19 @@ class AdsAdapter(private val adsList: List<Ad>) :
                 else -> "Sin especialidad"
             }
 
+            // Actualizar Vistas
             holder.phoneTextView.text = "Contacto: $phone"
             holder.specialtyTextView.text = specialtyToShow
-        }
 
+            // 🚨 APLICAR EL TAG DE EMERGENCIA
+            if (attendsEmergencies) {
+                // Ya que el texto está fijo en el XML, solo necesitamos hacerlo visible
+                holder.emergencyTagTextView.visibility = View.VISIBLE
+            } else {
+                holder.emergencyTagTextView.visibility = View.GONE
+            }
+
+        }
 
         // 📌 Imagen del anuncio
         if (!ad.mediaUrl.isNullOrEmpty()) {

@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Imagen destacada del anuncio -->
         <ImageView
             android:id="@+id/image_ad_item"
             android:layout_width="match_parent"
@@ -33,12 +32,21 @@
             tools:text="Plomero" />
 
         <TextView
-            android:id="@+id/text_ad_content"
-            android:layout_width="match_parent"
+            android:id="@+id/text_emergency_tag"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="16sp"
-            tools:text="Reparación de fugas, instalación de tuberías y más. Servicio 24 horas." />
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="¡ATIENDE EMERGENCIAS! 🚨"
+            android:visibility="gone" /> <TextView
+        android:id="@+id/text_ad_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        tools:text="Reparación de fugas, instalación de tuberías y más. Servicio 24 horas." />
 
         <TextView
             android:id="@+id/text_ad_phone"
