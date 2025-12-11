@@ -51,9 +51,16 @@ class DirectoryActivity : AppCompatActivity() {
         )
 
         // El adaptador ahora recibe esta nueva lista de objetos
+        // Dentro de DirectoryActivity.kt, en onCreate:
+
         val categoryAdapter = CategoryAdapter(categories) { categoryItem ->
             val intent = Intent(this, ContractorListActivity::class.java)
-            intent.putExtra("CATEGORY_NAME", categoryItem.name) // Pasamos solo el nombre a la siguiente actividad
+            intent.putExtra("CATEGORY_NAME", categoryItem.name)
+
+            // 🚨 LÍNEA ELIMINADA: Ya NO se fuerza la ordenación.
+            // La ContractorListActivity ahora cargará la lista en el orden de Firebase
+            // y esperará la selección del usuario en el Spinner.
+
             startActivity(intent)
         }
         recyclerView.adapter = categoryAdapter

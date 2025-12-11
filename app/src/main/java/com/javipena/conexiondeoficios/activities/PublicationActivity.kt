@@ -219,25 +219,48 @@ class PublicationActivity : AppCompatActivity() {
         specialty: String,
         mediaUrl: String?
     ) {
-        val databaseRef = FirebaseDatabase.getInstance().getReference("Ads")
+        val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
-        val adData = Ad(
-            contractorId = userId,
-            adText = adText,
-            phone = phone,
-            latitude = latitude,
-            longitude = longitude,
-            specialty = specialty,
-            mediaUrl = mediaUrl
-        )
+        // 1. 🚨 PRIMERO, OBTENER LOS DATOS DE CALIFICACIÓN DEL CONTRATISTA
+        usersRef.child(userId).get()
+            .addOnSuccessListener { userSnapshot ->
 
-        databaseRef.child(adId).setValue(adData)
-            .addOnSuccessListener {
-                Toast.makeText(this, "✅ Anuncio publicado correctamente", Toast.LENGTH_LONG).show()
-                returnToMenu()
+                // 2. Extraer la calificación y el conteo (asegurando valores por defecto si son null)
+                // Se asume que estos campos existen en el perfil del usuario (User/Contractor)
+                val avgRating = userSnapshot.child("averageRating").getValue(Double::class.java) ?: 0.0
+                val reviewCt = userSnapshot.child("reviewCount").getValue(Int::class.java) ?: 0
+
+                // 3. Crear el objeto Ad con los datos de calificación
+                val adData = Ad(
+                    contractorId = userId,
+                    adText = adText,
+                    phone = phone,
+                    latitude = latitude,
+                    longitude = longitude,
+                    specialty = specialty,
+                    mediaUrl = mediaUrl,
+
+                    // 🚨 INCLUIR LOS DATOS DE ORDENAMIENTO
+                    averageRating = avgRating,
+                    reviewCount = reviewCt
+                )
+
+                // 4. Guardar el objeto Ad completo en el nodo "Ads"
+                val adsRef = FirebaseDatabase.getInstance().getReference("Ads")
+                adsRef.child(adId).setValue(adData)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "✅ Anuncio publicado correctamente", Toast.LENGTH_LONG).show()
+                        returnToMenu()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "❌ Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
+                        setLoading(false)
+                    }
+
             }
             .addOnFailureListener {
-                Toast.makeText(this, "❌ Error al guardar el anuncio.", Toast.LENGTH_SHORT).show()
+                // Manejo de error si no se pudo leer el perfil del usuario
+                Toast.makeText(this, "❌ Error: No se pudo verificar la calificación del contratista.", Toast.LENGTH_SHORT).show()
                 setLoading(false)
             }
     }

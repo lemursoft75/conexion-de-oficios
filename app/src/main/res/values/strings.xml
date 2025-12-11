@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Conexion de Oficios</string>
+    <string name="app_name">Conexión de Oficios</string>
+
+    <string-array name="sort_options">
+        <item>Por Defecto</item>
+        <item>Mejores Reseñas</item>
+    </string-array>
 </resources>

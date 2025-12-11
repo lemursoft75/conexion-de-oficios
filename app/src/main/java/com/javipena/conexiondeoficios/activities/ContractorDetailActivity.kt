@@ -211,6 +211,21 @@ class ContractorDetailActivity : AppCompatActivity() {
                         }
                     }
 
+                    // 🚨 IMPLEMENTACIÓN DEL ORDENAMIENTO:
+                    // Ordenamos la lista de reseñas de forma descendente (de mayor a menor)
+                    // basándonos en el campo 'rating' del objeto Review (que es el segundo elemento del Pair).
+
+                    // Ordenamiento por calificación (de 5 estrellas a 1)
+                    reviewList.sortByDescending { it.second.rating }
+
+                    // Opcional: Si quieres un ordenamiento más robusto (rating y luego fecha):
+                    /*
+                    reviewList.sortWith(compareByDescending<Pair<String, Review>> { it.second.rating }
+                        .thenByDescending { it.second.timestamp }
+                    )
+                    */
+
+                    // Después de ordenar, notificamos al adaptador
                     reviewAdapter.notifyDataSetChanged()
                 }
 

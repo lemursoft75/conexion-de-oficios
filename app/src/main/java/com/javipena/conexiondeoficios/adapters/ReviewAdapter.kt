@@ -37,28 +37,28 @@ class ReviewAdapter(
         holder.ratingBar.rating = review.rating.toFloat()
         holder.comment.text = review.comment
 
-        // --- AQUÍ VA TU LÓGICA ---
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        // --- LÓGICA MODIFICADA ---
 
-        // Mostrar el botón de borrar solo si el usuario actual es el autor de la reseña
-        if (review.clientId == currentUserId) {
+        // 🚨 Impedimos que el cliente elimine su reseña.
+        // Si el botón está visible por defecto, lo ocultamos.
+        // Si quieres que el ADMIN pueda borrar, aquí pondrías la lógica del Admin.
+
+        // Por defecto, ocultamos el botón de borrar
+        holder.deleteButton.visibility = View.GONE
+
+        // Si quisieras que solo el administrador pueda borrar, la lógica sería:
+        /*
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId == "TU_ID_DE_ADMIN") { // Reemplaza con el ID de tu cuenta Admin
             holder.deleteButton.visibility = View.VISIBLE
             holder.deleteButton.setOnClickListener {
-                // Lógica para borrar la reseña
-                val reviewRef = FirebaseDatabase.getInstance().getReference("Users")
-                    .child(contractorId) // ID del contratista al que pertenece la reseña
-                    .child("reviews")
-                    .child(reviewId)     // ID de la reseña específica a borrar
-
-                reviewRef.removeValue().addOnSuccessListener {
-                    // Elimina el item de la lista local y notifica al adaptador
-                    reviewList.removeAt(holder.adapterPosition)
-                    notifyItemRemoved(holder.adapterPosition)
-                }
+                 // ... Lógica de borrado (mantienes el código anterior) ...
             }
         } else {
             holder.deleteButton.visibility = View.GONE
         }
+        */
+        // -------------------------
     }
 
     override fun getItemCount() = reviewList.size
