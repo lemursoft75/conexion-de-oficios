@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView // 📌 Nueva importación
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import com.javipena.conexiondeoficios.R
 class RecoverPasswordActivity : AppCompatActivity() {
     private lateinit var editEmail: EditText
     private lateinit var btnRecover: Button
+    private lateinit var textBackLogin: TextView // 📌 1. Declarar la TextView
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,9 +24,19 @@ class RecoverPasswordActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         editEmail = findViewById(R.id.edit_email)
         btnRecover = findViewById(R.id.btn_recover)
+        textBackLogin = findViewById(R.id.text_back_login) // 📌 2. Inicializar la TextView
 
         btnRecover.setOnClickListener {
             recoverPassword()
+        }
+
+        // 📌 3. Asignar el Listener para volver al Login
+        textBackLogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            // Se usan flags similares a las del diálogo para asegurar que se vaya al login y cierre esta actividad
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish() // Cierra RecoverPasswordActivity
         }
     }
 

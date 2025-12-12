@@ -46,8 +46,8 @@ android {
 
 dependencies {
     // Firebase Database
-    implementation("com.google.firebase:firebase-database-ktx:20.2.2")
-    implementation("com.google.firebase:firebase-auth-ktx:22.2.0") // 📌 Agrega esta línea
+    implementation("com.google.firebase:firebase-database:20.2.2")
+    implementation("com.google.firebase:firebase-auth:22.2.0")
 
     // Core de Android
     implementation("androidx.core:core-ktx:1.15.0")

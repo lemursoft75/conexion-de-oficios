@@ -1,7 +1,7 @@
 package com.javipena.conexiondeoficios.activities
 
 import android.Manifest
-import android.app.Activity
+import android.app.Activity // Se mantiene si usas Activity.RESULT_OK en otro lugar, pero no en este código refactorizado
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -15,6 +15,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
 import android.widget.VideoView
+// 📌 NUEVAS IMPORTACIONES
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
@@ -38,6 +40,31 @@ class PublicationActivity : AppCompatActivity() {
     // --- Variables de Firebase y de estado ---
     private lateinit var auth: FirebaseAuth
     private var mediaUri: Uri? = null
+
+    // 📌 NUEVO: LECTOR DE RESULTADOS (ACTIVITY RESULT API)
+    private val mediaPickerLauncher = registerForActivityResult(
+        // Utilizamos el contrato para obtener cualquier tipo de contenido
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        // ESTE BLOQUE REEMPLAZA TODA LA LÓGICA DE onActivityResult
+        if (uri != null) {
+            mediaUri = uri
+            val mimeType = contentResolver.getType(mediaUri!!)
+
+            if (mimeType?.startsWith("video") == true) {
+                imagePreview.visibility = View.GONE
+                videoPreview.visibility = View.VISIBLE
+                videoPreview.setVideoURI(mediaUri)
+                videoPreview.setOnPreparedListener { it.isLooping = true }
+                videoPreview.start()
+            } else {
+                videoPreview.visibility = View.GONE
+                imagePreview.visibility = View.VISIBLE
+                imagePreview.setImageURI(mediaUri)
+            }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,10 +104,12 @@ class PublicationActivity : AppCompatActivity() {
             if (permissionsToRequest.isNotEmpty()) {
                 requestPermissions(permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS_CODE)
             } else {
-                launchFileChooserIntent()
+                // 📌 CAMBIO CLAVE: Usa el nuevo lanzador
+                launchMediaPicker()
             }
         } else {
-            launchFileChooserIntent()
+            // 📌 CAMBIO CLAVE: Usa el nuevo lanzador
+            launchMediaPicker()
         }
     }
 
@@ -92,42 +121,25 @@ class PublicationActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_PERMISSIONS_CODE) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                launchFileChooserIntent()
+                // Si se conceden los permisos, llama al lanzador
+                launchMediaPicker()
             } else {
                 Toast.makeText(this, "Se necesitan permisos para acceder a la galería.", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun launchFileChooserIntent() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        startActivityForResult(Intent.createChooser(intent, "Selecciona una imagen o video"), REQUEST_MEDIA_PICK)
+    // 📌 NUEVO MÉTODO DE LANZAMIENTO
+    private fun launchMediaPicker() {
+        // El input para GetContent es el MIME type o un conjunto de MIME types separados por comas.
+        // Aquí pedimos imágenes y videos.
+        mediaPickerLauncher.launch("image/*, video/*")
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_MEDIA_PICK && resultCode == Activity.RESULT_OK && data?.data != null) {
-            mediaUri = data.data
-            val mimeType = contentResolver.getType(mediaUri!!)
 
-            if (mimeType?.startsWith("video") == true) {
-                imagePreview.visibility = View.GONE
-                videoPreview.visibility = View.VISIBLE
-                videoPreview.setVideoURI(mediaUri)
-                videoPreview.setOnPreparedListener { it.isLooping = true }
-                videoPreview.start()
-            } else {
-                videoPreview.visibility = View.GONE
-                imagePreview.visibility = View.VISIBLE
-                imagePreview.setImageURI(mediaUri)
-            }
-        }
-    }
-
+    // 🚨 MÉTODOS OBSOLETOS ELIMINADOS:
+    // ELIMINAR launchFileChooserIntent() y onActivityResult()
+    // Esto resuelve las advertencias en las líneas 108 y 111.
     // --- LÓGICA DE PUBLICACIÓN ---
 
     private fun publishAd() {
@@ -282,7 +294,8 @@ class PublicationActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val REQUEST_MEDIA_PICK = 1001
+        // 🚨 ELIMINAMOS ESTA CONSTANTE (ya no se usa)
+        // private const val REQUEST_MEDIA_PICK = 1001
         private const val REQUEST_PERMISSIONS_CODE = 2001
     }
 }
