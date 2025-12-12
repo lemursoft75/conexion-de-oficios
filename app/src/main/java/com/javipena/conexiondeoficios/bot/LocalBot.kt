@@ -23,7 +23,7 @@ class LocalBot {
         "publicar anuncio" to "Para publicar un anuncio, ve al menú y selecciona 'Publicar anuncio'. Completa los datos y guarda.",
         "editar anuncio" to "Para editar tu anuncio, entra a tu perfil, selecciona tu anuncio y presiona 'Editar'.",
         "eliminar anuncio" to "Para eliminar un anuncio, abre tu perfil, selecciona el anuncio y presiona 'Eliminar'.",
-        "contactar técnico" to "Para contactar un tecnico, entra a una categoría, selecciona un anuncio y verás el número de contacto.",
+        "contactar tecnico" to "Para contactar un tecnico, entra a una categoría, selecciona un anuncio y verás el número de contacto.",
         "no veo anuncios" to "Si no ves anuncios, revisa tu conexión o prueba otra categoría. A veces aún no hay técnicos registrados ahí.",
         "cuenta" to "Tu cuenta se crea automáticamente al iniciar sesión. Puedes actualizar tus datos desde tu perfil."
     )
