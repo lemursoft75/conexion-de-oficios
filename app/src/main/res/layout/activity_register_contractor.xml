@@ -35,7 +35,7 @@
             <!-- Tus campos normales -->
             <EditText android:id="@+id/edit_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre"/>
             <EditText android:id="@+id/edit_lastname" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Apellidos" android:layout_marginTop="16dp"/>
-            <EditText android:id="@+id/edit_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Teléfono" android:layout_marginTop="16dp"/>
+            <EditText android:id="@+id/edit_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Teléfono(con prefijo 52)" android:layout_marginTop="16dp"/>
             <EditText android:id="@+id/edit_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Correo"/>
             <EditText android:id="@+id/edit_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contraseña" android:inputType="textPassword"/>
             <EditText android:id="@+id/edit_confirm_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Confirmar contraseña" android:inputType="textPassword"/>

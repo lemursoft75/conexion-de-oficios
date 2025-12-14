@@ -2,48 +2,93 @@ package com.javipena.conexiondeoficios.bot
 
 class LocalBot {
 
-    // Preguntas sugeridas (se le muestran al usuario al abrir el chat)
-    val suggestedQuestions = listOf(
-        "¿Cómo publico un anuncio?",
-        "¿Cómo edito mi anuncio?",
-        "¿Cómo contacto a un tecnico?",
-        "¿Por qué no veo anuncios?",
-        "¿Cómo funciona mi cuenta?"
-    )
-
-    // Mensaje de bienvenida
     fun getWelcomeMessage(): String {
-        return "¡Hola! 👋 Soy tu asistente de Conexión de Oficios.\n" +
-                "¿En qué puedo ayudarte hoy?\n\n" +
-                "Aquí tienes algunas preguntas sugeridas:"
+        return """
+            ¡Hola! 👋 Soy tu asistente de Conexión de Oficios.
+            Puedo ayudarte con lo siguiente:
+
+            • Publicar anuncio
+            • Editar anuncio
+            • Eliminar anuncio
+            • Contactar técnico
+            • Problemas con la cuenta
+            • Asistencia
+
+            Escribe una opción o tu duda.
+        """.trimIndent()
     }
 
-    // Lista de preguntas y respuestas del bot
-    private val responses = mapOf(
-        "publicar anuncio" to "Para publicar un anuncio, ve al menú y selecciona 'Publicar anuncio'. Completa los datos y guarda.",
-        "editar anuncio" to "Para editar tu anuncio, entra a tu perfil, selecciona tu anuncio y presiona 'Editar'.",
-        "eliminar anuncio" to "Para eliminar un anuncio, abre tu perfil, selecciona el anuncio y presiona 'Eliminar'.",
-        "contactar tecnico" to "Para contactar un tecnico, entra a una categoría, selecciona un anuncio y verás el número de contacto.",
-        "no veo anuncios" to "Si no ves anuncios, revisa tu conexión o prueba otra categoría. A veces aún no hay técnicos registrados ahí.",
-        "cuenta" to "Tu cuenta se crea automáticamente al iniciar sesión. Puedes actualizar tus datos desde tu perfil."
+    private val faqIntents = listOf(
+
+        Intent(
+            keywords = listOf("publicar", "subir", "crear", "poner"),
+            response = "Para publicar un anuncio, ve al menú y selecciona 'Publicar anuncio'. Completa los datos y guarda."
+        ),
+
+        Intent(
+            keywords = listOf("editar", "modificar", "cambiar"),
+            response = "Para editar tu anuncio, entra a tu perfil, selecciona el anuncio y presiona 'Editar'."
+        ),
+
+        Intent(
+            keywords = listOf("eliminar", "borrar", "quitar"),
+            response = "Para eliminar un anuncio, entra a tu perfil, selecciona el anuncio y presiona 'Eliminar'."
+        ),
+
+        Intent(
+            keywords = listOf("contactar", "hablar", "llamar", "whatsapp", "tecnico"),
+            response = "Selecciona un anuncio y verás el botón para contactar por WhatsApp o ver la ubicación del técnico."
+        ),
+
+        Intent(
+            keywords = listOf("no veo", "no aparecen", "sin anuncios"),
+            response = "Si no ves anuncios, es posible que aún no haya técnicos registrados en esa categoría."
+        ),
+
+        Intent(
+            keywords = listOf("cuenta", "perfil", "registro"),
+            response = "Regístrate desde 'Regístrate aquí'. Puedes editar tus datos desde tu perfil."
+        ),
+
+        Intent(
+            keywords = listOf("asistencia", "ayuda", "soporte"),
+            response = "Asistencia:\n9995499691\nWhatsApp disponible"
+
+        )
+
     )
 
     fun getResponse(userMessage: String): String {
-        val msg = userMessage.lowercase()
+        val msg = normalize(userMessage)
 
-        // Buscar coincidencias por palabras clave
-        for ((key, value) in responses) {
-            if (msg.contains(key)) {
-                return value
+        for (intent in faqIntents) {
+            if (intent.keywords.any { msg.contains(it) }) {
+                return intent.response
             }
         }
 
-        // Respuesta genérica si no encuentra
-        return "No estoy seguro de eso, pero puedo ayudarte con:\n" +
-                "- Publicar anuncio\n" +
-                "- Editar anuncio\n" +
-                "- Contactar tecnico\n" +
-                "- Problemas con anuncios\n" +
-                "- Información de la cuenta"
+        return """
+            No entendí del todo, pero puedo ayudarte con:
+            • Publicar anuncios
+            • Editar o eliminar anuncios
+            • Contactar técnicos
+            • Problemas con anuncios
+            • Información de tu cuenta
+            • Asistencia
+        """.trimIndent()
+    }
+
+    private fun normalize(text: String): String {
+        return text.lowercase()
+            .replace("á", "a")
+            .replace("é", "e")
+            .replace("í", "i")
+            .replace("ó", "o")
+            .replace("ú", "u")
     }
 }
+
+data class Intent(
+    val keywords: List<String>,
+    val response: String
+)

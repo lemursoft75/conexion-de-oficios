@@ -1,5 +1,6 @@
 package com.javipena.conexiondeoficios.adapters
 
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,7 @@ class ChatAdapter(private val messages: List<Pair<String, Boolean>>) :
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (messages[position].second) 1 else 0 // user o bot
+        return if (messages[position].second) 1 else 0
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
@@ -30,6 +31,9 @@ class ChatAdapter(private val messages: List<Pair<String, Boolean>>) :
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         holder.textMessage.text = messages[position].first
+
+        // ✅ ESTO hace clickeable el teléfono
+        holder.textMessage.movementMethod = LinkMovementMethod.getInstance()
     }
 
     override fun getItemCount(): Int = messages.size

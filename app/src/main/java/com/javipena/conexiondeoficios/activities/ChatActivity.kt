@@ -3,14 +3,14 @@ package com.javipena.conexiondeoficios.activities
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.javipena.conexiondeoficios.databinding.ActivityChatBinding
-import com.javipena.conexiondeoficios.bot.LocalBot
 import com.javipena.conexiondeoficios.adapters.ChatAdapter
+import com.javipena.conexiondeoficios.bot.LocalBot
+import com.javipena.conexiondeoficios.databinding.ActivityChatBinding
 
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChatBinding
-    private val messages = mutableListOf<Pair<String, Boolean>>()   // String = mensaje, Boolean = isUser
+    private val messages = mutableListOf<Pair<String, Boolean>>() // mensaje / esUsuario
     private lateinit var adapter: ChatAdapter
     private val bot = LocalBot()
 
@@ -24,18 +24,8 @@ class ChatActivity : AppCompatActivity() {
         binding.recyclerChat.layoutManager = LinearLayoutManager(this)
         binding.recyclerChat.adapter = adapter
 
-        // ⏳ Bienvenida automática del bot
-        addMessage(
-            "¡Hola! 👋 Bienvenido al centro de ayuda.\n" +
-                    "Puedo orientarte con lo siguiente:\n\n" +
-                    "• Publicar anuncio\n" +
-                    "• Editar anuncio\n" +
-                    "• Eliminar anuncio\n" +
-                    "• Contactar técnico\n" +
-                    "• Problemas con la cuenta\n\n" +
-                    "Escribe una opción o tu duda.",
-            false
-        )
+        // ✅ Mensaje inicial del BOT (NO hardcodeado)
+        addMessage(bot.getWelcomeMessage(), false)
 
         binding.btnSend.setOnClickListener {
             val text = binding.inputMessage.text.toString().trim()

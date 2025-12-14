@@ -9,9 +9,9 @@
         android:id="@+id/text_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="250dp"
-        android:background="@drawable/bg_bot"
-        android:padding="10dp"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:autoLink="phone|web"
+        android:textIsSelectable="true" />
 
 </LinearLayout>
