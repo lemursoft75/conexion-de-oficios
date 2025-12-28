@@ -35,11 +35,14 @@ class RegisterContractorActivity : AppCompatActivity() {
     private lateinit var btnRegister: Button
     private lateinit var btnDetectLocation: Button
 
-    // ✔ NUEVOS CAMPOS
+    // ✔ NUEVOS CAMPOS (Que ya tenías)
     private lateinit var switchEmergencies: Switch
     private lateinit var editDays: EditText
     private lateinit var editHoursFrom: EditText
     private lateinit var editHoursTo: EditText
+
+    // ✔ NUEVO: PRIVACIDAD
+    private lateinit var checkboxPrivacy: CheckBox
 
     private lateinit var auth: FirebaseAuth
 
@@ -74,6 +77,9 @@ class RegisterContractorActivity : AppCompatActivity() {
         editDays = findViewById(R.id.edit_days)
         editHoursFrom = findViewById(R.id.edit_hours_from)
         editHoursTo = findViewById(R.id.edit_hours_to)
+
+        // ✔ NUEVO: Inicialización de privacidad
+        checkboxPrivacy = findViewById(R.id.checkbox_privacy)
     }
 
     private fun setupSpecialtySpinner() {
@@ -92,6 +98,11 @@ class RegisterContractorActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         btnRegister.setOnClickListener { registerContractor() }
         btnDetectLocation.setOnClickListener { checkLocationPermission() }
+
+        // Nueva línea para ver el aviso
+        findViewById<TextView>(R.id.text_view_privacy).setOnClickListener {
+            showPrivacyPolicyDialog()
+        }
     }
 
     private fun checkLocationPermission() {
@@ -133,6 +144,7 @@ class RegisterContractorActivity : AppCompatActivity() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location ->
                 if (location != null) {
+                    // Mantengo tu formato exacto de decimales: %.6f
                     editLatitude.setText("%.6f".format(location.latitude))
                     editLongitude.setText("%.6f".format(location.longitude))
                     Toast.makeText(this, "Ubicación detectada.", Toast.LENGTH_SHORT).show()
@@ -161,6 +173,7 @@ class RegisterContractorActivity : AppCompatActivity() {
         val hourFrom = editHoursFrom.text.toString().trim()
         val hourTo = editHoursTo.text.toString().trim()
 
+        // --- VALIDACIONES ---
         if (name.isEmpty() || email.isEmpty() || password.isEmpty() || specialty == "Selecciona una especialidad") {
             Toast.makeText(this, "Completa todos los campos obligatorios.", Toast.LENGTH_SHORT).show()
             return
@@ -171,12 +184,18 @@ class RegisterContractorActivity : AppCompatActivity() {
             return
         }
 
+        // ✔ NUEVA VALIDACIÓN: PRIVACIDAD
+        if (!checkboxPrivacy.isChecked) {
+            Toast.makeText(this, "Debes aceptar el aviso de privacidad y términos para registrarte.", Toast.LENGTH_LONG).show()
+            return
+        }
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { taskAuth ->
                 if (taskAuth.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
 
-                    // Guardar en Firebase
+                    // Guardar en Firebase (Mantengo tu estructura original y agrego los consentimientos)
                     val contractorData = mapOf(
                         "name" to name,
                         "lastname" to lastname,
@@ -191,11 +210,18 @@ class RegisterContractorActivity : AppCompatActivity() {
                         "averageRating" to 0.0,
                         "reviewCount" to 0,
 
-                        // ✔ NUEVOS
+                        // ✔ NUEVOS (Los que ya tenías)
                         "attendsEmergencies" to attendsEmergencies,
                         "attentionDays" to days,
                         "attentionFrom" to hourFrom,
-                        "attentionTo" to hourTo
+                        "attentionTo" to hourTo,
+
+                        // ✔ NUEVOS (Consentimiento legal solicitado)
+                        "privacyAccepted" to true,
+                        "diffusionConsent" to true,
+                        "reviewsAccepted" to true,
+                        "dataPolicy" to "delete_on_cancellation",
+                        "consentTimestamp" to System.currentTimeMillis()
                     )
 
                     FirebaseDatabase.getInstance().getReference("Users")
@@ -211,6 +237,28 @@ class RegisterContractorActivity : AppCompatActivity() {
                     Toast.makeText(this, "Error: ${taskAuth.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
+    }
+
+    private fun showPrivacyPolicyDialog() {
+        val privacyText = """
+        AVISO DE PRIVACIDAD Y TÉRMINOS DE SERVICIO
+        
+        1. Difusión de Servicios: Al registrarse, usted autoriza a Conexión de Oficios a mostrar su nombre, especialidad, empresa y datos de contacto a los usuarios de la plataforma.
+        
+        2. Sistema de Reseñas: Usted acepta que los usuarios califiquen la calidad de su trabajo. Estas calificaciones son públicas para ayudar a otros usuarios.
+        
+        3. Uso de Datos: Sus datos personales (RFC, Teléfono, Ubicación) se usarán exclusivamente para la conexión de servicios de oficio.
+        
+        4. Cancelación: En cumplimiento con la ley de protección de datos, al cancelar su cuenta, toda su información personal y registros de servicios serán eliminados de nuestra base de datos activa de forma definitiva.
+        
+        5. Consentimiento: Al marcar la casilla de registro, usted otorga su consentimiento expreso para los fines antes mencionados.
+    """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle("Aviso de Privacidad")
+            .setMessage(privacyText)
+            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun showSuccessDialog() {

@@ -249,12 +249,16 @@ class ContractorDetailActivity : AppCompatActivity() {
             val comment = editTextComment.text.toString().trim()
             val currentUser = FirebaseAuth.getInstance().currentUser
             val clientId = currentUser?.uid
-            val clientName = currentUser?.displayName ?: "Cliente"
+
+            // --- CAMBIO AQUÍ ---
+            // Usamos .email en lugar de .displayName
+            // Si por alguna razón el email fuera nulo, ponemos un respaldo
+            val clientName = currentUser?.email ?: "Usuario sin correo"
 
             if (clientId != null && rating > 0) {
                 val reviewData = Review(
                     clientId = clientId,
-                    clientName = clientName,
+                    clientName = clientName, // Ahora esto guardará el email en Firebase
                     rating = rating,
                     comment = comment,
                     timestamp = System.currentTimeMillis()

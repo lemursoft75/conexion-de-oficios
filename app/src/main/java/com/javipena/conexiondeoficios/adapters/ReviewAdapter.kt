@@ -33,32 +33,14 @@ class ReviewAdapter(
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val (reviewId, review) = reviewList[position]
 
+        // Si review.clientName contiene el correo en Firebase, aquí se mostrará.
         holder.clientName.text = review.clientName
+
         holder.ratingBar.rating = review.rating.toFloat()
         holder.comment.text = review.comment
 
-        // --- LÓGICA MODIFICADA ---
-
-        // 🚨 Impedimos que el cliente elimine su reseña.
-        // Si el botón está visible por defecto, lo ocultamos.
-        // Si quieres que el ADMIN pueda borrar, aquí pondrías la lógica del Admin.
-
-        // Por defecto, ocultamos el botón de borrar
+        // Ocultar botón de borrar (según tu lógica actual)
         holder.deleteButton.visibility = View.GONE
-
-        // Si quisieras que solo el administrador pueda borrar, la lógica sería:
-        /*
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserId == "TU_ID_DE_ADMIN") { // Reemplaza con el ID de tu cuenta Admin
-            holder.deleteButton.visibility = View.VISIBLE
-            holder.deleteButton.setOnClickListener {
-                 // ... Lógica de borrado (mantienes el código anterior) ...
-            }
-        } else {
-            holder.deleteButton.visibility = View.GONE
-        }
-        */
-        // -------------------------
     }
 
     override fun getItemCount() = reviewList.size

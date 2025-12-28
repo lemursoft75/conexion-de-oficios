@@ -4,7 +4,9 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:background="@android:color/white"
+    android:layout_marginBottom="8dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,8 +16,13 @@
             android:id="@+id/text_client_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/btn_delete_review"
+            android:layout_alignParentStart="true"
             android:textStyle="bold"
-            tools:text="Ana P."/>
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@android:color/black"
+            tools:text="usuario.ejemplo.largo@gmail.com"/>
 
         <ImageButton
             android:id="@+id/btn_delete_review"
@@ -25,7 +32,8 @@
             android:layout_alignParentEnd="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible"
+            android:contentDescription="Eliminar reseña"/>
 
     </RelativeLayout>
 
@@ -36,13 +44,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:numStars="5"
-        android:isIndicator="true"/>
+        android:isIndicator="true"
+        android:progressTint="@color/yellow"/> <TextView
+    android:id="@+id/text_comment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:textColor="#444444"
+    tools:text="Este es un comentario de ejemplo sobre el excelente servicio que recibí."/>
 
-    <TextView
-        android:id="@+id/text_comment"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        tools:text="Este es un comentario de ejemplo sobre el excelente servicio que recibí."/>
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        android:layout_marginTop="12dp"/>
 
 </LinearLayout>

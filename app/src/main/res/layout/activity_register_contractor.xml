@@ -32,7 +32,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Tus campos normales -->
             <EditText android:id="@+id/edit_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre"/>
             <EditText android:id="@+id/edit_lastname" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Apellidos" android:layout_marginTop="16dp"/>
             <EditText android:id="@+id/edit_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Teléfono(con prefijo 52)" android:layout_marginTop="16dp"/>
@@ -45,7 +44,6 @@
 
             <EditText android:id="@+id/edit_rfc" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="RFC (opcional)" android:layout_marginTop="16dp"/>
 
-            <!-- Ubicación -->
             <TextView
                 android:text="Ubicación (manual o GPS):"
                 android:layout_width="wrap_content"
@@ -80,7 +78,6 @@
                 android:layout_height="wrap_content"
                 android:text="Detectar ubicación GPS"/>
 
-            <!-- NUEVO: Emergencias -->
             <TextView
                 android:text="¿Atiende emergencias?"
                 android:layout_width="wrap_content"
@@ -93,7 +90,6 @@
                 android:layout_height="wrap_content"
                 android:text="Sí, disponible para emergencias 24/7"/>
 
-            <!-- NUEVO: Días de atención -->
             <EditText
                 android:id="@+id/edit_days"
                 android:layout_width="match_parent"
@@ -101,7 +97,6 @@
                 android:hint="Días de atención (Ej: Lunes a Sábado)"
                 android:layout_marginTop="20dp"/>
 
-            <!-- NUEVO: Horarios -->
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -123,6 +118,26 @@
                     android:hint="A (Ej: 6:00 PM)"
                     android:layout_marginStart="8dp"/>
             </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/checkbox_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Acepto el aviso de privacidad. Consiento el uso de mis datos para difusión de mis servicios y acepto que los usuarios califiquen la calidad de mi trabajo mediante reseñas. Entiendo que mis datos se darán de baja al cancelar mi cuenta."
+                android:textSize="12sp"
+                android:textColor="#555555" />
+
+            <TextView
+                android:id="@+id/text_view_privacy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Leer Aviso de Privacidad completo aquí"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textSize="12sp"
+                android:padding="8dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="20dp"/>
 
         </LinearLayout>
     </ScrollView>
