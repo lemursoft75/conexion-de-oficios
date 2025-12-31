@@ -1,23 +1,34 @@
 package com.javipena.conexiondeoficios.activities
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.recyclerview.widget.GridLayoutManager
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+// --- IMPORTACIONES PARA EL VIGILANTE ---
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+// ---------------------------------------
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.javipena.conexiondeoficios.R
 import com.javipena.conexiondeoficios.adapters.CategoryAdapter
 import com.javipena.conexiondeoficios.adapters.CategoryItem
 
 class DirectoryActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_directory)
@@ -25,11 +36,11 @@ class DirectoryActivity : AppCompatActivity() {
         // Configuración de la Toolbar personalizada
         val toolbar: Toolbar = findViewById(R.id.toolbar_directory)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false) // Ocultamos el título por defecto
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        // Lógica para la lista de categorías por especialidad
+        // --- LÓGICA DE CATEGORÍAS ---
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_categories)
-        recyclerView.layoutManager = GridLayoutManager(this, 3) // 3 columnas
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
         val categories = listOf(
             CategoryItem("Albañil", R.drawable.ic_construction),
             CategoryItem("Electricista", R.drawable.ic_bolt),
@@ -50,59 +61,154 @@ class DirectoryActivity : AppCompatActivity() {
             CategoryItem("Otro", R.drawable.ic_more)
         )
 
-        // El adaptador ahora recibe esta nueva lista de objetos
-        // Dentro de DirectoryActivity.kt, en onCreate:
-
         val categoryAdapter = CategoryAdapter(categories) { categoryItem ->
             val intent = Intent(this, ContractorListActivity::class.java)
             intent.putExtra("CATEGORY_NAME", categoryItem.name)
-
-            // 🚨 LÍNEA ELIMINADA: Ya NO se fuerza la ordenación.
-            // La ContractorListActivity ahora cargará la lista en el orden de Firebase
-            // y esperará la selección del usuario en el Spinner.
-
             startActivity(intent)
         }
         recyclerView.adapter = categoryAdapter
 
-        // Lógica para el botón de búsqueda cercana
+        // --- BOTÓN BÚSQUEDA CERCANA ---
         val btnFindNearby = findViewById<Button>(R.id.btn_find_nearby)
         btnFindNearby.setOnClickListener {
             startActivity(Intent(this, NearbyAdsActivity::class.java))
         }
 
-        // 📌 LÓGICA AÑADIDA PARA EL AVISO DE RESPONSABILIDAD
+        // --- 📌 NUEVA LÓGICA: BOTÓN MOSTRAR QR DE CLIENTE ---
+        val btnShowQr = findViewById<Button>(R.id.btn_open_qr_dialog)
+        btnShowQr.setOnClickListener {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            if (uid != null) {
+                showQrDialog(uid)
+            } else {
+                Toast.makeText(this, "Debes iniciar sesión para ver tu QR", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // --- 🚨 VIGILANTE DE SERVICIOS FINALIZADOS ---
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId != null) {
+            listenForPayments(currentUserId)
+        }
+
+        // --- AVISO DE RESPONSABILIDAD ---
         val textDisclaimer = findViewById<TextView>(R.id.text_disclaimer)
         textDisclaimer.setOnClickListener {
             showDisclaimerDialog()
         }
 
+        // --- BOTÓN CHATBOT ---
         val btnChat = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_chatbot)
-
         btnChat.setOnClickListener {
-            val intent = Intent(this, ChatActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ChatActivity::class.java))
         }
-
     }
 
     /**
-     * Esta nueva función crea y muestra el diálogo con el aviso.
+     * Escucha cambios en CompletedServices para mostrar el aviso al cliente
      */
+    private fun listenForPayments(userId: String) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("CompletedServices")
+
+        // Usamos addValueEventListener para que escuche cambios en tiempo real
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) return
+
+                // Recorremos cada contratista (Nodo de primer nivel)
+                for (contractorSnapshot in snapshot.children) {
+                    val contractorId = contractorSnapshot.key
+
+                    // Buscamos si dentro de este contratista existe el ID del cliente
+                    if (contractorSnapshot.hasChild(userId)) {
+                        val serviceData = contractorSnapshot.child(userId)
+
+                        // Extraemos los valores con seguridad
+                        val status = serviceData.child("status").getValue(String::class.java)
+                        val isPending = serviceData.child("payment_pending").getValue(Boolean::class.java) ?: false
+
+                        // Si se cumplen las condiciones, disparamos la alerta
+                        if (status == "completed" && isPending && contractorId != null) {
+                            runOnUiThread {
+                                showPaymentAlert(contractorId)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@DirectoryActivity, "Error de red: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // 1. Declara la variable de la alerta arriba en la clase
+    private var paymentDialog: AlertDialog? = null
+
+    // 2. Modifica la función showPaymentAlert
+    private fun showPaymentAlert(contractorId: String) {
+        if (isFinishing || (paymentDialog != null && paymentDialog!!.isShowing)) return
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("¡Servicio Finalizado!")
+        builder.setMessage("El contratista ha confirmado el trabajo. ¿Deseas ir al perfil para dejar tu calificación?")
+
+        builder.setPositiveButton("Ir a Calificar") { dialog, _ ->
+            // CERRAR LA ALERTA ANTES DE NAVEGAR
+            dialog.dismiss()
+            paymentDialog = null
+
+            val intent = Intent(this, ContractorDetailActivity::class.java)
+            intent.putExtra("CONTRACTOR_ID", contractorId)
+            startActivity(intent)
+        }
+
+        builder.setNegativeButton("Más tarde") { dialog, _ ->
+            dialog.dismiss()
+            paymentDialog = null
+        }
+
+        builder.setCancelable(false)
+        paymentDialog = builder.create()
+        paymentDialog?.show()
+    }
+
+    /**
+     * Genera el QR y lo muestra en un diálogo flotante
+     */
+    private fun showQrDialog(userId: String) {
+        val builder = AlertDialog.Builder(this)
+        val view = layoutInflater.inflate(R.layout.dialog_user_qr, null)
+        builder.setView(view)
+
+        val dialog = builder.create()
+        val imgQr = view.findViewById<ImageView>(R.id.img_qr_placeholder)
+        val btnClose = view.findViewById<Button>(R.id.btn_close_qr)
+
+        try {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap: Bitmap = barcodeEncoder.encodeBitmap(userId, BarcodeFormat.QR_CODE, 500, 500)
+            imgQr.setImageBitmap(bitmap)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error al generar código QR", Toast.LENGTH_SHORT).show()
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
     private fun showDisclaimerDialog() {
         AlertDialog.Builder(this)
             .setTitle("Aviso de Responsabilidad")
             .setMessage(
-                "\"Conexión de Oficios\" es una plataforma de enlace que facilita la conexión entre clientes y proveedores de servicios. No verificamos ni garantizamos la calidad, cumplimiento o desempeño de los trabajos realizados por los contratistas. La responsabilidad de cada servicio contratado recae exclusivamente en las partes involucradas.\n\n" +
-                        "Asimismo, nos reservamos el derecho de admisión de solicitudes de contratistas para garantizar el buen funcionamiento de la plataforma y la experiencia de los usuarios."
+                "\"Conexión de Oficios\" es una plataforma de enlace..."
             )
-            .setPositiveButton("Entendido") { dialog, _ ->
-                dialog.dismiss()
-            }
+            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
-    // Métodos para manejar el menú de opciones (sin cambios)
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.directory_menu, menu)
         return true

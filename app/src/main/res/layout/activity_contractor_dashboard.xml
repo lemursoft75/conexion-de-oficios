@@ -26,6 +26,16 @@
         app:icon="@drawable/ic_add" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_scan_client_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Finalizar Trabajo (Escanear Cliente)"
+        android:paddingVertical="12dp"
+        app:backgroundTint="@color/red"
+        app:icon="@drawable/ic_qr_code" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_view_my_ads"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,7 +59,5 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:text="Cerrar Sesión" />
-
-
 
 </LinearLayout>

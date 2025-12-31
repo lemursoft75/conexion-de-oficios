@@ -12,29 +12,37 @@ class ContractorDashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contractor_dashboard)
 
+        // Inicialización de botones
         val btnCreateAd: Button = findViewById(R.id.btn_create_ad)
         val btnViewMyAds: Button = findViewById(R.id.btn_view_my_ads)
+        val btnEditProfile: Button = findViewById(R.id.btn_edit_profile)
         val btnLogout: Button = findViewById(R.id.btn_logout)
 
-        // Botón para ir a la pantalla de crear anuncio
+        // --- NUEVO BOTÓN PARA EL ESCÁNER ---
+        val btnScanQr: Button = findViewById(R.id.btn_scan_client_qr)
+
+        // Lógica para publicar anuncio
         btnCreateAd.setOnClickListener {
             startActivity(Intent(this, PublicationActivity::class.java))
         }
 
-        // 📌 ¡AQUÍ VA EL CÓDIGO!
-        // Botón para ir a la pantalla de "Mis Anuncios"
+        // Lógica para ver/editar mis anuncios
         btnViewMyAds.setOnClickListener {
             startActivity(Intent(this, MyAdsActivity::class.java))
         }
 
-        // En ContractorDashboardActivity.kt, dentro de onCreate
-
-        val btnEditProfile = findViewById<Button>(R.id.btn_edit_profile)
+        // Lógica para editar perfil del contratista
         btnEditProfile.setOnClickListener {
             startActivity(Intent(this, EditProfileActivity::class.java))
         }
 
-        // Botón para cerrar sesión y volver al Login
+        // --- LÓGICA PARA ABRIR EL ESCÁNER ---
+        btnScanQr.setOnClickListener {
+            // Abre la actividad que configuramos con la cámara
+            startActivity(Intent(this, ScannerActivity::class.java))
+        }
+
+        // Botón para cerrar sesión
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, LoginActivity::class.java)

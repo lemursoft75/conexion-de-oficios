@@ -55,7 +55,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
 
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
@@ -91,4 +91,8 @@ dependencies {
     // 📌 AÑADIDO: Dependencias para Glide (cargar imágenes desde URL)
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     kapt ("com.github.bumptech.glide:compiler:4.16.0")
+
+    // Librerías para QR y Escáner (Versiones Estables)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.4.1")
 }

@@ -50,8 +50,14 @@ class ContractorDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_contractor_detail)
-        title = "Detalle del Anuncio"
+        title = "Detalle del Servicio"
 
+        setupViews()
+
+        // 1. Intentamos obtener el ID directo (desde MainActivity)
+        val directId = intent.getStringExtra("CONTRACTOR_ID")
+
+        // 2. Intentamos obtener el objeto Ad (desde la lista de anuncios)
         val ad = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("AD_DETAIL", Ad::class.java)
         } else {
@@ -59,17 +65,28 @@ class ContractorDetailActivity : AppCompatActivity() {
             intent.getParcelableExtra<Ad>("AD_DETAIL")
         }
 
-        if (ad == null) {
-            Toast.makeText(this, "Error al cargar los datos del anuncio.", Toast.LENGTH_LONG).show()
-            finish()
-            return
+        // 3. Decidimos qué cargar
+        when {
+            directId != null -> {
+                // Caso: Venimos de la alerta de pago
+                setupRecyclerView(directId)
+                fetchContractorProfile(directId)
+                fetchReviews(directId)
+                setupReviewButton(directId)
+            }
+            ad != null -> {
+                // Caso: Venimos de la navegación normal
+                setupRecyclerView(ad.contractorId)
+                populateUI(ad) // Esto ya llama a fetchProfile y fetchReviews
+                setupReviewButton(ad.contractorId)
+            }
+            else -> {
+                Toast.makeText(this, "Error al cargar datos.", Toast.LENGTH_LONG).show()
+                finish()
+            }
         }
 
-        setupViews()
-        setupRecyclerView(ad.contractorId)
-        populateUI(ad)
         setupButtons()
-        setupReviewButton(ad.contractorId)
     }
 
     private fun setupViews() {
@@ -165,7 +182,8 @@ class ContractorDetailActivity : AppCompatActivity() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null && !currentUser.isAnonymous) {
             btnLeaveReview.visibility = View.VISIBLE
-            btnLeaveReview.setOnClickListener { showLeaveReviewDialog(contractorId) }
+            // Llamamos a la función que define qué pasa al hacer clic
+            checkReviewPermission(contractorId)
         } else {
             btnLeaveReview.visibility = View.GONE
         }
@@ -249,29 +267,34 @@ class ContractorDetailActivity : AppCompatActivity() {
             val comment = editTextComment.text.toString().trim()
             val currentUser = FirebaseAuth.getInstance().currentUser
             val clientId = currentUser?.uid
-
-            // --- CAMBIO AQUÍ ---
-            // Usamos .email en lugar de .displayName
-            // Si por alguna razón el email fuera nulo, ponemos un respaldo
             val clientName = currentUser?.email ?: "Usuario sin correo"
 
             if (clientId != null && rating > 0) {
                 val reviewData = Review(
                     clientId = clientId,
-                    clientName = clientName, // Ahora esto guardará el email en Firebase
+                    clientName = clientName,
                     rating = rating,
                     comment = comment,
                     timestamp = System.currentTimeMillis()
                 )
 
-                FirebaseDatabase.getInstance().getReference("Users")
-                    .child(contractorId)
-                    .child("reviews")
-                    .push()
-                    .setValue(reviewData)
+                // 1. Guardamos la reseña en el perfil del contratista
+                val dbRef = FirebaseDatabase.getInstance().getReference("Users")
+                dbRef.child(contractorId).child("reviews").push().setValue(reviewData)
                     .addOnSuccessListener {
+
+                        // 2. 🚨 LIMPIEZA: Eliminamos el registro de servicio completado
+                        // para que no pueda calificar dos veces por el mismo escaneo.
+                        FirebaseDatabase.getInstance().getReference("CompletedServices")
+                            .child(contractorId)
+                            .child(clientId)
+                            .removeValue() // O puedes usar .child("status").setValue("reviewed")
+
                         Toast.makeText(this, "¡Gracias por tu opinión!", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
+
+                        // Opcional: Refrescar la vista o cerrar la actividad
+                        fetchReviews(contractorId)
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "Error al publicar la reseña.", Toast.LENGTH_SHORT).show()
@@ -283,5 +306,46 @@ class ContractorDetailActivity : AppCompatActivity() {
 
         builder.setNegativeButton("Cancelar", null)
         builder.create().show()
+    }
+    private fun checkReviewPermission(contractorId: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // 1. Creamos una variable local para rastrear el estado
+        var isConfirmed = false
+
+        val dbRef = FirebaseDatabase.getInstance().getReference("CompletedServices")
+            .child(contractorId)
+            .child(currentUserId)
+
+        // 2. Mantenemos el listener para actualizar la variable 'isConfirmed'
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Si el nodo existe, cambiamos el estado a true
+                isConfirmed = snapshot.exists()
+
+                // Opcional: Cambiamos la opacidad para dar una pista visual
+                btnLeaveReview.alpha = if (isConfirmed) 1.0f else 0.7f
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("DetailActivity", "Error al verificar permiso: ${error.message}")
+            }
+        })
+
+        // 3. 🚨 CLAVE: El click listener va FUERA del addValueEventListener
+        // Así, el botón responderá siempre, incluso si no hay internet o si el nodo no existe.
+        btnLeaveReview.setOnClickListener {
+            if (isConfirmed) {
+                // ✅ CASO POSITIVO: Abrimos el diálogo para escribir la reseña
+                showLeaveReviewDialog(contractorId)
+            } else {
+                // ❌ CASO NEGATIVO: Mostramos el mensaje de advertencia que pediste
+                AlertDialog.Builder(this)
+                    .setTitle("Evaluación Pendiente")
+                    .setMessage("No puedes escribir una reseña todavía. Es necesario que el contratista escanee tu código QR al finalizar el trabajo para habilitar esta opción.")
+                    .setPositiveButton("Entendido", null)
+                    .show()
+            }
+        }
     }
 }
