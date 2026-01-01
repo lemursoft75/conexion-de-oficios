@@ -211,6 +211,17 @@ class DirectoryActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.directory_menu, menu)
+
+        // Opcional: Forzar color negro a los iconos si tampoco se ven
+        if (menu != null) {
+            for (i in 0 until menu.size()) {
+                val item = menu.getItem(i)
+                val icon = item.icon
+                if (icon != null) {
+                    icon.setTint(android.graphics.Color.BLACK)
+                }
+            }
+        }
         return true
     }
 

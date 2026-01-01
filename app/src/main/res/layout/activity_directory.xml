@@ -1,106 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".activities.DirectoryActivity">
+    android:background="@color/white">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_directory"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_directory"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Conexión de Oficios"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Conexión de Oficios"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:paddingBottom="80dp">
 
-    </androidx.appcompat.widget.Toolbar>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_find_nearby"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="16dp"
+                android:text="Buscar Cerca de Mí"
+                app:icon="@drawable/ic_location"
+                app:backgroundTint="@color/red"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_find_nearby"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Buscar Cerca de Mí"
-        app:icon="@drawable/ic_location"
-        app:backgroundTint="@color/red"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_directory" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_open_qr_dialog"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="8dp"
+                android:text="Mi QR de Cliente"
+                app:icon="@drawable/ic_qr_code"
+                app:backgroundTint="@color/red"
+                app:layout_constraintTop_toBottomOf="@id/btn_find_nearby"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_open_qr_dialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Mi QR de Cliente"
-        app:icon="@drawable/ic_qr_code"
-        app:backgroundTint="@color/red"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_find_nearby" />
+            <TextView
+                android:id="@+id/text_subtitle_categories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O Selecciona una Categoría:"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_open_qr_dialog" />
 
-    <TextView
-        android:id="@+id/text_subtitle_categories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="O Selecciona una Categoría:"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_open_qr_dialog" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_categories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintTop_toBottomOf="@id/text_subtitle_categories"
+                tools:listitem="@layout/category_item" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_categories"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/text_subtitle_categories"
-        app:layout_constraintBottom_toTopOf="@id/text_disclaimer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:listitem="@layout/category_item" />
+            <TextView
+                android:id="@+id/text_disclaimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aviso de Responsabilidad"
+                android:textColor="?attr/colorPrimary"
+                android:padding="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintTop_toBottomOf="@id/recycler_categories"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/text_disclaimer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Aviso de Responsabilidad"
-        android:textColor="?attr/colorPrimary"
-        android:padding="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_chatbot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Chatbot"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
         app:srcCompat="@drawable/ic_chat"
         app:backgroundTint="@color/red"
-        app:tint="@android:color/white"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:tint="@android:color/white" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
