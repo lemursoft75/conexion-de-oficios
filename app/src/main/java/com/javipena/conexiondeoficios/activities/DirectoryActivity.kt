@@ -29,6 +29,9 @@ import com.javipena.conexiondeoficios.adapters.CategoryItem
 
 class DirectoryActivity : AppCompatActivity() {
 
+    private var paymentsRef: com.google.firebase.database.DatabaseReference? = null
+    private var paymentsListener: com.google.firebase.database.ValueEventListener? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_directory)
@@ -94,7 +97,7 @@ class DirectoryActivity : AppCompatActivity() {
         // --- AVISO DE RESPONSABILIDAD ---
         val textDisclaimer = findViewById<TextView>(R.id.text_disclaimer)
         textDisclaimer.setOnClickListener {
-            showDisclaimerDialog()
+            showDisclaimer() // <--- Antes decía showDisclaimerDialog(), cámbialo a showDisclaimer()
         }
 
         // --- BOTÓN CHATBOT ---
@@ -108,39 +111,36 @@ class DirectoryActivity : AppCompatActivity() {
      * Escucha cambios en CompletedServices para mostrar el aviso al cliente
      */
     private fun listenForPayments(userId: String) {
-        val dbRef = FirebaseDatabase.getInstance().getReference("CompletedServices")
+        paymentsRef = FirebaseDatabase.getInstance().getReference("CompletedServices")
 
-        // Usamos addValueEventListener para que escuche cambios en tiempo real
-        dbRef.addValueEventListener(object : ValueEventListener {
+        paymentsListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) return
-
-                // Recorremos cada contratista (Nodo de primer nivel)
                 for (contractorSnapshot in snapshot.children) {
                     val contractorId = contractorSnapshot.key
-
-                    // Buscamos si dentro de este contratista existe el ID del cliente
                     if (contractorSnapshot.hasChild(userId)) {
                         val serviceData = contractorSnapshot.child(userId)
-
-                        // Extraemos los valores con seguridad
                         val status = serviceData.child("status").getValue(String::class.java)
                         val isPending = serviceData.child("payment_pending").getValue(Boolean::class.java) ?: false
 
-                        // Si se cumplen las condiciones, disparamos la alerta
                         if (status == "completed" && isPending && contractorId != null) {
-                            runOnUiThread {
-                                showPaymentAlert(contractorId)
-                            }
+                            runOnUiThread { showPaymentAlert(contractorId) }
                         }
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@DirectoryActivity, "Error de red: ${error.message}", Toast.LENGTH_SHORT).show()
+                // Este es el error que ves en el Toast actual
+                // Si el error es por falta de permisos tras cerrar sesión, lo ignoramos
+                if (!error.message.contains("Permission denied", ignoreCase = true)) {
+                    Toast.makeText(this@DirectoryActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
             }
-        })
+        }
+
+        // Activar el listener
+        paymentsRef?.addValueEventListener(paymentsListener!!)
     }
 
     // 1. Declara la variable de la alerta arriba en la clase
@@ -199,14 +199,26 @@ class DirectoryActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showDisclaimerDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Aviso de Responsabilidad")
-            .setMessage(
-                "\"Conexión de Oficios\" es una plataforma de enlace..."
-            )
-            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
-            .show()
+    private fun showDisclaimer() {
+        val message = "\"Conexión de Oficios\" es una plataforma de enlace que facilita la conexión entre clientes y proveedores de servicios (contratistas). La aplicación no garantiza la calidad, seguridad o legalidad de los servicios prestados. Cualquier acuerdo, pago o disputa es responsabilidad exclusiva de las partes involucradas. Recomendamos verificar referencias antes de contratar."
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Aviso de Responsabilidad")
+        builder.setMessage(message)
+        builder.setPositiveButton("Entendido") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+
+        // --- ESTO ES LO QUE ELIMINA LOS PUNTOS SUSPENSIVOS ---
+        val textView = dialog.findViewById<TextView>(android.R.id.message)
+        textView?.let {
+            it.maxLines = 100         // Permitimos hasta 100 líneas si es necesario
+            it.ellipsize = null       // Desactiva los puntos suspensivos
+            it.isSingleLine = false   // Fuerza a que no sea una sola línea
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -232,7 +244,10 @@ class DirectoryActivity : AppCompatActivity() {
                 true
             }
             R.id.menu_logout -> {
+                paymentsListener?.let { paymentsRef?.removeEventListener(it) }
                 FirebaseAuth.getInstance().signOut()
+
+
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
@@ -241,5 +256,9 @@ class DirectoryActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        paymentsListener?.let { paymentsRef?.removeEventListener(it) }
     }
 }
